@@ -28,6 +28,14 @@ interface IMainErrorProps {
   isModal?: boolean;
 }
 
+const printStackTrace = () => {
+  try {
+    throw new Error();
+  } catch (e:any) {
+    console.log("Function call stack:", e.stack);
+  }
+};
+
 const MainError = ({ isModal = false }: IMainErrorProps) => {
   const dispatch = useAppDispatch();
   const snackBar = useSelector((state: AppState) => {

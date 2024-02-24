@@ -36,7 +36,7 @@ const initialState: ObjectBrowserState = {
   selectedBucket: "",
   versionsMode: false,
   reloadObjectsList: false,
-  requestInProgress: true,
+  requestInProgress: false,
   objectDetailsOpen: false,
   loadingVersions: true,
   loadingObjectInfo: true,

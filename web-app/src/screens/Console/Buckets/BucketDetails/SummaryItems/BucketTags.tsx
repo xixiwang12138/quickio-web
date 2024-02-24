@@ -67,6 +67,7 @@ const BucketTags = ({ bucketName }: BucketTagProps) => {
   };
 
   const onTagLoaded = (res: Bucket) => {
+    console.log(res)
     if (!!res && res?.details != null) {
       if (res.details.tags) {
         setTags(res?.details?.tags);
@@ -80,13 +81,14 @@ const BucketTags = ({ bucketName }: BucketTagProps) => {
   };
 
   const onTagLoadFailed = (err: ErrorResponseHandler) => {
+    console.log("[TAG]", err)
     dispatch(setErrorSnackMessage(err));
   };
 
   const [isLoading, invokeTagsApi] = useApi(onTagLoaded, onTagLoadFailed);
 
   const fetchTags = () => {
-    invokeTagsApi("GET", `/api/v1/buckets/${bucketName}`);
+    invokeTagsApi("GET", `/buckets/${bucketName}`);
   };
 
   useEffect(() => {

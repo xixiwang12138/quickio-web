@@ -14,7 +14,7 @@
 //  You should have received a copy of the GNU Affero General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import * as React from "react";
-import { Fragment } from "react";
+import {Fragment, useEffect} from "react";
 import { KBarProvider } from "kbar";
 import Console from "./Console";
 import { useSelector } from "react-redux";
@@ -29,6 +29,10 @@ const ConsoleKBar = () => {
   const anonymousMode = useSelector(
     (state: AppState) => state.system.anonymousMode,
   );
+
+  useEffect(()=>{
+      console.log("ConsoleKBar")
+  })
 
   // if we are hiding the menu also disable the k-bar so just return console
   if (features?.includes("hide-menu")) {

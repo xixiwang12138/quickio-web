@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Fragment, Suspense } from "react";
+import React, {Fragment, Suspense, useEffect} from "react";
 import { ApplicationLogo, Button } from "mds";
 import { Route, Routes } from "react-router-dom";
 import { IAM_PAGES } from "../../common/SecureComponent/permissions";
@@ -29,6 +29,9 @@ import ObjectManagerButton from "../Console/Common/ObjectManager/ObjectManagerBu
 
 const AnonymousAccess = () => {
   const dispatch = useAppDispatch();
+  useEffect(()=> {
+      console.log("++++++++++++++ AnonymousAccess")
+  })
 
   return (
     <Fragment>

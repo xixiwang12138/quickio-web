@@ -131,6 +131,7 @@ const BucketDetails = () => {
           dispatch(setBucketInfo(res.data));
         })
         .catch((err) => {
+          console.log("[bucketInfo]", err)
           dispatch(setBucketDetailsLoad(false));
           dispatch(setErrorSnackMessage(errorToHandler(err)));
         });
@@ -167,6 +168,7 @@ const BucketDetails = () => {
 
   return (
     <Fragment>
+      {/*1. 删除bucket*/}
       {deleteOpen && (
         <DeleteBucket
           deleteOpen={deleteOpen}
@@ -209,7 +211,7 @@ const BucketDetails = () => {
                 disabled={!canBrowse}
               />
             </TooltipWrapper>
-            <HelpMenu />
+            {/*<HelpMenu />*/}
           </Fragment>
         }
       />
@@ -229,16 +231,16 @@ const BucketDetails = () => {
               ]}
               resource={bucketName}
             >
-              <span style={{ fontSize: 15 }}>Access: </span>
-              <span
-                style={{
-                  fontWeight: 600,
-                  fontSize: 15,
-                  textTransform: "capitalize",
-                }}
-              >
-                {bucketInfo?.access?.toLowerCase()}
-              </span>
+              {/*<span style={{ fontSize: 15 }}>Access: </span>*/}
+              {/*<span*/}
+              {/*  style={{*/}
+              {/*    fontWeight: 600,*/}
+              {/*    fontSize: 15,*/}
+              {/*    textTransform: "capitalize",*/}
+              {/*  }}*/}
+              {/*>*/}
+              {/*  {bucketInfo?.access?.toLowerCase()}*/}
+              {/*</span>*/}
             </SecureComponent>
           }
           actions={
@@ -273,14 +275,14 @@ const BucketDetails = () => {
                   />
                 </TooltipWrapper>
               </SecureComponent>
-              <Button
-                id={"refresh-bucket-info"}
-                onClick={() => {
-                  dispatch(setBucketDetailsLoad(true));
-                }}
-                label={"Refresh"}
-                icon={<RefreshIcon />}
-              />
+              {/*<Button*/}
+              {/*  id={"refresh-bucket-info"}*/}
+              {/*  onClick={() => {*/}
+              {/*    dispatch(setBucketDetailsLoad(true));*/}
+              {/*  }}*/}
+              {/*  label={"Refresh"}*/}
+              {/*  icon={<RefreshIcon />}*/}
+              {/*/>*/}
             </Fragment>
           }
           sx={{ marginBottom: 15 }}
@@ -302,51 +304,6 @@ const BucketDetails = () => {
               },
               {
                 tabConfig: {
-                  label: "Events",
-                  id: "events",
-                  disabled: !hasPermission(bucketName, [
-                    IAM_SCOPES.S3_GET_BUCKET_NOTIFICATIONS,
-                    IAM_SCOPES.S3_PUT_BUCKET_NOTIFICATIONS,
-                    IAM_SCOPES.S3_GET_ACTIONS,
-                    IAM_SCOPES.S3_PUT_ACTIONS,
-                  ]),
-                  to: getRoutePath("events"),
-                },
-              },
-              {
-                tabConfig: {
-                  label: "Replication",
-                  id: "replication",
-                  disabled:
-                    !distributedSetup ||
-                    (siteReplicationInfo.enabled &&
-                      siteReplicationInfo.curSite) ||
-                    !hasPermission(bucketName, [
-                      IAM_SCOPES.S3_GET_REPLICATION_CONFIGURATION,
-                      IAM_SCOPES.S3_PUT_REPLICATION_CONFIGURATION,
-                      IAM_SCOPES.S3_GET_ACTIONS,
-                      IAM_SCOPES.S3_PUT_ACTIONS,
-                    ]),
-                  to: getRoutePath("replication"),
-                },
-              },
-              {
-                tabConfig: {
-                  label: "Lifecycle",
-                  id: "lifecycle",
-                  disabled:
-                    !distributedSetup ||
-                    !hasPermission(bucketName, [
-                      IAM_SCOPES.S3_GET_LIFECYCLE_CONFIGURATION,
-                      IAM_SCOPES.S3_PUT_LIFECYCLE_CONFIGURATION,
-                      IAM_SCOPES.S3_GET_ACTIONS,
-                      IAM_SCOPES.S3_PUT_ACTIONS,
-                    ]),
-                  to: getRoutePath("lifecycle"),
-                },
-              },
-              {
-                tabConfig: {
                   label: "Access",
                   id: "access",
                   disabled: !hasPermission(bucketName, [
@@ -357,34 +314,11 @@ const BucketDetails = () => {
                   to: getRoutePath("access"),
                 },
               },
-              {
-                tabConfig: {
-                  label: "Anonymous",
-                  id: "anonymous",
-                  disabled: !hasPermission(bucketName, [
-                    IAM_SCOPES.S3_GET_BUCKET_POLICY,
-                    IAM_SCOPES.S3_GET_ACTIONS,
-                  ]),
-                  to: getRoutePath("prefix"),
-                },
-              },
             ]}
             routes={
               <Routes>
                 <Route path="summary" element={<BucketSummaryPanel />} />
-                <Route path="events" element={<BucketEventsPanel />} />
-                {distributedSetup && (
-                  <Route
-                    path="replication"
-                    element={<BucketReplicationPanel />}
-                  />
-                )}
-                {distributedSetup && (
-                  <Route path="lifecycle" element={<BucketLifecyclePanel />} />
-                )}
-
                 <Route path="access" element={<AccessDetailsPanel />} />
-                <Route path="prefix" element={<AccessRulePanel />} />
                 <Route
                   path="*"
                   element={

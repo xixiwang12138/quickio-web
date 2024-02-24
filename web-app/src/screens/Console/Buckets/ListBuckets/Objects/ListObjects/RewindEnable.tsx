@@ -106,19 +106,19 @@ const RewindEnable = ({
           disabled={!rewindEnableButton}
         />
 
-        {rewindEnabled && (
-          <Switch
-            value="status"
-            id="status"
-            name="status"
-            checked={rewindEnableButton}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setRewindEnableButton(e.target.checked);
-            }}
-            label={"Current Status"}
-            indicatorLabels={["Enabled", "Disabled"]}
-          />
-        )}
+        {/*{rewindEnabled && (*/}
+        {/*  <Switch*/}
+        {/*    value="status"*/}
+        {/*    id="status"*/}
+        {/*    name="status"*/}
+        {/*    checked={rewindEnableButton}*/}
+        {/*    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {*/}
+        {/*      setRewindEnableButton(e.target.checked);*/}
+        {/*    }}*/}
+        {/*    label={"Current Status"}*/}
+        {/*    indicatorLabels={["Enabled", "Disabled"]}*/}
+        {/*  />*/}
+        {/*)}*/}
         <Grid item xs={12} sx={modalStyleUtils.modalButtonBar}>
           <Button
             type="button"

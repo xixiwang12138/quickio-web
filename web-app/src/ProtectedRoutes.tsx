@@ -91,9 +91,9 @@ const ProtectedRoute = ({ Component }: ProtectedRouteProps) => {
   );
 
   useEffect(() => {
-    if (userLoggedIn && !componentLoading && !anonymousMode) {
-      invokeSRInfoApi("GET", `api/v1/admin/site-replication`);
-    }
+    // if (userLoggedIn && !componentLoading && !anonymousMode) {
+    //   invokeSRInfoApi("GET", `api/v1/admin/site-replication`);
+    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userLoggedIn, componentLoading]);
 

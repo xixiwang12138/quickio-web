@@ -194,9 +194,6 @@ const BucketListItem = ({
             ? new Date(bucket.creation_date).toString()
             : "n/a"}
         </span>
-        <span id={`access-${bucket.name}`}>
-          <strong>Access:</strong> {accessToStr(bucket)}
-        </span>
       </Box>
       <Box className={"bucketMetrics"}>
         <Link to={`/buckets/${bucket.name}/admin`}>

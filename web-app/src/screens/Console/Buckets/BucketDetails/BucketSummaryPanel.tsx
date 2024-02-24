@@ -96,11 +96,11 @@ const BucketSummary = () => {
   const [loadingObjectLocking, setLoadingLocking] = useState<boolean>(true);
   const [loadingSize, setLoadingSize] = useState<boolean>(true);
   const [bucketLoading, setBucketLoading] = useState<boolean>(true);
-  const [loadingEncryption, setLoadingEncryption] = useState<boolean>(true);
-  const [loadingVersioning, setLoadingVersioning] = useState<boolean>(true);
+  const [loadingEncryption, setLoadingEncryption] = useState<boolean>(false);
+  const [loadingVersioning, setLoadingVersioning] = useState<boolean>(false);
   const [loadingQuota, setLoadingQuota] = useState<boolean>(true);
-  const [loadingReplication, setLoadingReplication] = useState<boolean>(true);
-  const [loadingRetention, setLoadingRetention] = useState<boolean>(true);
+  const [loadingReplication, setLoadingReplication] = useState<boolean>(false);
+  const [loadingRetention, setLoadingRetention] = useState<boolean>(false);
   const [versioningInfo, setVersioningInfo] =
     useState<BucketVersioningResponse>();
   const [quotaEnabled, setQuotaEnabled] = useState<boolean>(false);
@@ -127,18 +127,13 @@ const BucketSummary = () => {
   let accessPolicy = "n/a";
   let policyDefinition = "";
 
-  if (bucketInfo !== null && bucketInfo.access && bucketInfo.definition) {
+  console.log("[Debug1010]",bucketInfo);
+  if (bucketInfo !== null && bucketInfo.access) {
     accessPolicy = bucketInfo.access;
-    policyDefinition = bucketInfo.definition;
   }
 
   const displayGetBucketObjectLockConfiguration = hasPermission(bucketName, [
     IAM_SCOPES.S3_GET_BUCKET_OBJECT_LOCK_CONFIGURATION,
-    IAM_SCOPES.S3_GET_ACTIONS,
-  ]);
-
-  const displayGetBucketEncryptionConfiguration = hasPermission(bucketName, [
-    IAM_SCOPES.S3_GET_BUCKET_ENCRYPTION_CONFIGURATION,
     IAM_SCOPES.S3_GET_ACTIONS,
   ]);
 
@@ -155,52 +150,6 @@ const BucketSummary = () => {
   }, [loadingBucket, setBucketLoading]);
 
   useEffect(() => {
-    if (loadingEncryption) {
-      if (displayGetBucketEncryptionConfiguration) {
-        api.buckets
-          .getBucketEncryptionInfo(bucketName)
-          .then((res) => {
-            if (res.data.algorithm) {
-              setEncryptionEnabled(true);
-              setEncryptionCfg(res.data);
-            }
-            setLoadingEncryption(false);
-          })
-          .catch((err) => {
-            err = errorToHandler(err.error);
-            if (
-              err.errorMessage ===
-              "The server side encryption configuration was not found"
-            ) {
-              setEncryptionEnabled(false);
-              setEncryptionCfg(null);
-            }
-            setLoadingEncryption(false);
-          });
-      } else {
-        setEncryptionEnabled(false);
-        setEncryptionCfg(null);
-        setLoadingEncryption(false);
-      }
-    }
-  }, [loadingEncryption, bucketName, displayGetBucketEncryptionConfiguration]);
-
-  useEffect(() => {
-    if (loadingVersioning && distributedSetup) {
-      api.buckets
-        .getBucketVersioning(bucketName)
-        .then((res) => {
-          setVersioningInfo(res.data);
-          setLoadingVersioning(false);
-        })
-        .catch((err) => {
-          dispatch(setErrorSnackMessage(errorToHandler(err.error)));
-          setLoadingVersioning(false);
-        });
-    }
-  }, [loadingVersioning, dispatch, bucketName, distributedSetup]);
-
-  useEffect(() => {
     if (loadingQuota && distributedSetup) {
       if (displayGetBucketQuota) {
         api.buckets
@@ -215,6 +164,7 @@ const BucketSummary = () => {
             setLoadingQuota(false);
           })
           .catch((err) => {
+            console.log("[Panel]", err)
             dispatch(setErrorSnackMessage(errorToHandler(err.error)));
             setQuotaEnabled(false);
             setLoadingQuota(false);
@@ -234,33 +184,8 @@ const BucketSummary = () => {
   ]);
 
   useEffect(() => {
-    if (loadingVersioning && distributedSetup) {
-      if (displayGetBucketObjectLockConfiguration) {
-        api.buckets
-          .getBucketObjectLockingStatus(bucketName)
-          .then((res) => {
-            setHasObjectLocking(res.data.object_locking_enabled);
-            setLoadingLocking(false);
-          })
-          .catch((err) => {
-            dispatch(setErrorSnackMessage(errorToHandler(err.error)));
-            setLoadingLocking(false);
-          });
-      } else {
-        setLoadingLocking(false);
-      }
-    }
-  }, [
-    loadingObjectLocking,
-    dispatch,
-    bucketName,
-    loadingVersioning,
-    distributedSetup,
-    displayGetBucketObjectLockConfiguration,
-  ]);
-
-  useEffect(() => {
     if (loadingSize) {
+      // TODO 修改api
       api.buckets
         .listBuckets()
         .then((res) => {
@@ -282,38 +207,6 @@ const BucketSummary = () => {
     }
   }, [loadingSize, dispatch, bucketName]);
 
-  useEffect(() => {
-    if (loadingReplication && distributedSetup) {
-      api.buckets
-        .getBucketReplication(bucketName)
-        .then((res) => {
-          const r = res.data.rules ? res.data.rules : [];
-          setReplicationRules(r.length > 0);
-          setLoadingReplication(false);
-        })
-        .catch((err) => {
-          dispatch(setErrorSnackMessage(errorToHandler(err.error)));
-          setLoadingReplication(false);
-        });
-    }
-  }, [loadingReplication, dispatch, bucketName, distributedSetup]);
-
-  useEffect(() => {
-    if (loadingRetention && hasObjectLocking) {
-      api.buckets
-        .getBucketRetentionConfig(bucketName)
-        .then((res) => {
-          setLoadingRetention(false);
-          setRetentionEnabled(true);
-          setRetentionConfig(res.data);
-        })
-        .catch((err) => {
-          setRetentionEnabled(false);
-          setLoadingRetention(false);
-          setRetentionConfig(null);
-        });
-    }
-  }, [loadingRetention, hasObjectLocking, bucketName]);
 
   const loadAllBucketData = () => {
     dispatch(setBucketDetailsLoad(true));
@@ -323,18 +216,10 @@ const BucketSummary = () => {
     setLoadingEncryption(true);
     setLoadingRetention(true);
   };
-
-  const setBucketVersioning = () => {
-    setEnableVersioningOpen(true);
-  };
   const setBucketQuota = () => {
     setEnableQuotaScreenOpen(true);
   };
 
-  const closeEnableBucketEncryption = () => {
-    setEnableEncryptionScreenOpen(false);
-    setLoadingEncryption(true);
-  };
   const closeEnableBucketQuota = () => {
     setEnableQuotaScreenOpen(false);
     setLoadingQuota(true);
@@ -345,37 +230,8 @@ const BucketSummary = () => {
     loadAllBucketData();
   };
 
-  const closeRetentionConfig = () => {
-    setRetentionConfigOpen(false);
-    loadAllBucketData();
-  };
-
-  const closeEnableVersioning = (refresh: boolean) => {
-    setEnableVersioningOpen(false);
-    if (refresh) {
-      loadAllBucketData();
-    }
-  };
-
-  let versioningStatus = versioningInfo?.status;
-  let versioningText = "Unversioned (Default)";
-  if (versioningStatus === "Enabled") {
-    versioningText = "Versioned";
-  } else if (versioningStatus === "Suspended") {
-    versioningText = "Suspended";
-  }
-
   return (
     <Fragment>
-      {enableEncryptionScreenOpen && (
-        <EnableBucketEncryption
-          open={enableEncryptionScreenOpen}
-          selectedBucket={bucketName}
-          encryptionEnabled={encryptionEnabled}
-          encryptionCfg={encryptionCfg}
-          closeModalAndRefresh={closeEnableBucketEncryption}
-        />
-      )}
       {enableQuotaScreenOpen && (
         <EnableQuota
           open={enableQuotaScreenOpen}
@@ -392,22 +248,6 @@ const BucketSummary = () => {
           actualPolicy={accessPolicy}
           actualDefinition={policyDefinition}
           closeModalAndRefresh={closeSetAccessPolicy}
-        />
-      )}
-      {retentionConfigOpen && (
-        <SetRetentionConfig
-          bucketName={bucketName}
-          open={retentionConfigOpen}
-          closeModalAndRefresh={closeRetentionConfig}
-        />
-      )}
-      {enableVersioningOpen && (
-        <EnableVersioningModal
-          closeVersioningModalAndRefresh={closeEnableVersioning}
-          modalOpen={enableVersioningOpen}
-          selectedBucket={bucketName}
-          versioningInfo={versioningInfo}
-          objectLockingEnabled={!!hasObjectLocking}
         />
       )}
 
@@ -466,92 +306,26 @@ const BucketSummary = () => {
 
                 <SecureComponent
                   scopes={[
-                    IAM_SCOPES.S3_GET_BUCKET_ENCRYPTION_CONFIGURATION,
-                    IAM_SCOPES.S3_GET_ACTIONS,
-                  ]}
-                  resource={bucketName}
-                >
-                  <EditablePropertyItem
-                    iamScopes={[
-                      IAM_SCOPES.S3_PUT_BUCKET_ENCRYPTION_CONFIGURATION,
-                      IAM_SCOPES.S3_PUT_ACTIONS,
-                    ]}
-                    resourceName={bucketName}
-                    property={"Encryption:"}
-                    value={encryptionEnabled ? "Enabled" : "Disabled"}
-                    onEdit={() => {
-                      setEnableEncryptionScreenOpen(true);
-                    }}
-                    isLoading={loadingEncryption}
-                    helpTip={
-                      <Fragment>
-                        MinIO supports enabling automatic{" "}
-                        <a
-                          href="https://min.io/docs/minio/kubernetes/upstream/administration/server-side-encryption/server-side-encryption-sse-kms.html"
-                          target="blank"
-                        >
-                          SSE-KMS
-                        </a>{" "}
-                        and{" "}
-                        <a
-                          href="https://min.io/docs/minio/kubernetes/upstream/administration/server-side-encryption/server-side-encryption-sse-s3.html"
-                          target="blank"
-                        >
-                          SSE-S3
-                        </a>{" "}
-                        encryption of all objects written to a bucket using a
-                        specific External Key (EK) stored on the external KMS.
-                      </Fragment>
-                    }
-                  />
-                </SecureComponent>
-
-                <SecureComponent
-                  scopes={[
-                    IAM_SCOPES.S3_GET_REPLICATION_CONFIGURATION,
-                    IAM_SCOPES.S3_GET_ACTIONS,
-                  ]}
-                  resource={bucketName}
-                >
-                  <ValuePair
-                    label={"Replication:"}
-                    value={
-                      <LabelWithIcon
-                        icon={
-                          replicationRules ? <EnabledIcon /> : <DisabledIcon />
-                        }
-                        label={
-                          <label className={"muted"}>
-                            {replicationRules ? "Enabled" : "Disabled"}
-                          </label>
-                        }
-                      />
-                    }
-                  />
-                </SecureComponent>
-
-                <SecureComponent
-                  scopes={[
                     IAM_SCOPES.S3_GET_BUCKET_OBJECT_LOCK_CONFIGURATION,
                     IAM_SCOPES.S3_GET_ACTIONS,
                   ]}
                   resource={bucketName}
                 >
-                  <ValuePair
-                    label={"Object Locking:"}
-                    value={
-                      <LabelWithIcon
-                        icon={
-                          hasObjectLocking ? <EnabledIcon /> : <DisabledIcon />
-                        }
-                        label={
-                          <label className={"muted"}>
-                            {hasObjectLocking ? "Enabled" : "Disabled"}
-                          </label>
-                        }
-                      />
-                    }
-                  />
+                  {/*<ValuePair*/}
+                  {/*  label={"Object Locking:"}*/}
+                  {/*  value={*/}
+                  {/*    <LabelWithIcon*/}
+                  {/*      icon={*/}
+                  {/*        hasObjectLocking ? <EnabledIcon /> : <DisabledIcon />*/}
+                  {/*      }*/}
+                  {/*      label={*/}
+                  {/*        <label className={"muted"}>*/}
+                  {/*          {hasObjectLocking ? "Enabled" : "Disabled"}*/}
+                  {/*        </label>*/}
+                  {/*      }*/}
+                  {/*    />*/}
+                  {/*  }*/}
+                  {/*/>*/}
                 </SecureComponent>
                 <Box>
                   <ValuePair
@@ -597,128 +371,78 @@ const BucketSummary = () => {
           </Grid>
         </SecureComponent>
 
-        {distributedSetup && (
-          <SecureComponent
-            scopes={[
-              IAM_SCOPES.S3_GET_BUCKET_VERSIONING,
-              IAM_SCOPES.S3_GET_ACTIONS,
-            ]}
-            resource={bucketName}
-          >
-            <Grid item xs={12} sx={{ marginTop: 5 }}>
-              <SectionTitle separator sx={{ marginBottom: 15 }}>
-                Versioning
-              </SectionTitle>
+        {/*{hasObjectLocking && (*/}
+        {/*  <SecureComponent*/}
+        {/*    scopes={[*/}
+        {/*      IAM_SCOPES.S3_GET_OBJECT_RETENTION,*/}
+        {/*      IAM_SCOPES.S3_GET_ACTIONS,*/}
+        {/*    ]}*/}
+        {/*    resource={bucketName}*/}
+        {/*  >*/}
+        {/*    <Grid item xs={12} sx={{ marginTop: 5 }}>*/}
+        {/*      <SectionTitle separator sx={{ marginBottom: 15 }}>*/}
+        {/*        Retention*/}
+        {/*      </SectionTitle>*/}
 
-              <Box sx={twoColCssGridLayoutConfig}>
-                <Box sx={twoColCssGridLayoutConfig}>
-                  <EditablePropertyItem
-                    iamScopes={[
-                      IAM_SCOPES.S3_PUT_BUCKET_VERSIONING,
-                      IAM_SCOPES.S3_PUT_ACTIONS,
-                    ]}
-                    resourceName={bucketName}
-                    property={"Current Status:"}
-                    value={
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          textDecorationStyle: "initial",
-                          placeItems: "flex-start",
-                          justifyItems: "flex-start",
-                          gap: 3,
-                        }}
-                      >
-                        <div> {versioningText}</div>
-                      </Box>
-                    }
-                    onEdit={setBucketVersioning}
-                    isLoading={loadingVersioning}
-                    disabled={hasObjectLocking}
-                  />
+        {/*      <Box sx={twoColCssGridLayoutConfig}>*/}
+        {/*        <Box sx={twoColCssGridLayoutConfig}>*/}
+        {/*          <EditablePropertyItem*/}
+        {/*            iamScopes={[IAM_SCOPES.ADMIN_SET_BUCKET_QUOTA]}*/}
+        {/*            resourceName={bucketName}*/}
+        {/*            property={"Retention:"}*/}
+        {/*            value={retentionEnabled ? "Enabled" : "Disabled"}*/}
+        {/*            onEdit={() => {*/}
+        {/*              setRetentionConfigOpen(true);*/}
+        {/*            }}*/}
+        {/*            isLoading={loadingRetention}*/}
+        {/*            helpTip={*/}
+        {/*              <Fragment>*/}
+        {/*                MinIO{" "}*/}
+        {/*                <a*/}
+        {/*                  target="blank"*/}
+        {/*                  href="https://min.io/docs/minio/macos/administration/object-management.html#object-retention"*/}
+        {/*                >*/}
+        {/*                  Object Locking*/}
+        {/*                </a>{" "}*/}
+        {/*                enforces Write-Once Read-Many (WORM) immutability to*/}
+        {/*                protect versioned objects from deletion.*/}
+        {/*              </Fragment>*/}
+        {/*            }*/}
+        {/*          />*/}
 
-                  {versioningInfo?.status === "Enabled" ? (
-                    <VersioningInfo versioningState={versioningInfo} />
-                  ) : null}
-                </Box>
-              </Box>
-            </Grid>
-          </SecureComponent>
-        )}
-
-        {hasObjectLocking && (
-          <SecureComponent
-            scopes={[
-              IAM_SCOPES.S3_GET_OBJECT_RETENTION,
-              IAM_SCOPES.S3_GET_ACTIONS,
-            ]}
-            resource={bucketName}
-          >
-            <Grid item xs={12} sx={{ marginTop: 5 }}>
-              <SectionTitle separator sx={{ marginBottom: 15 }}>
-                Retention
-              </SectionTitle>
-
-              <Box sx={twoColCssGridLayoutConfig}>
-                <Box sx={twoColCssGridLayoutConfig}>
-                  <EditablePropertyItem
-                    iamScopes={[IAM_SCOPES.ADMIN_SET_BUCKET_QUOTA]}
-                    resourceName={bucketName}
-                    property={"Retention:"}
-                    value={retentionEnabled ? "Enabled" : "Disabled"}
-                    onEdit={() => {
-                      setRetentionConfigOpen(true);
-                    }}
-                    isLoading={loadingRetention}
-                    helpTip={
-                      <Fragment>
-                        MinIO{" "}
-                        <a
-                          target="blank"
-                          href="https://min.io/docs/minio/macos/administration/object-management.html#object-retention"
-                        >
-                          Object Locking
-                        </a>{" "}
-                        enforces Write-Once Read-Many (WORM) immutability to
-                        protect versioned objects from deletion.
-                      </Fragment>
-                    }
-                  />
-
-                  <ValuePair
-                    label={"Mode:"}
-                    value={
-                      <label
-                        className={"muted"}
-                        style={{ textTransform: "capitalize" }}
-                      >
-                        {retentionConfig && retentionConfig.mode
-                          ? retentionConfig.mode
-                          : "-"}
-                      </label>
-                    }
-                  />
-                  <ValuePair
-                    label={"Validity:"}
-                    value={
-                      <label
-                        className={"muted"}
-                        style={{ textTransform: "capitalize" }}
-                      >
-                        {retentionConfig && retentionConfig.validity}{" "}
-                        {retentionConfig &&
-                          (retentionConfig.validity === 1
-                            ? retentionConfig.unit?.slice(0, -1)
-                            : retentionConfig.unit)}
-                      </label>
-                    }
-                  />
-                </Box>
-              </Box>
-            </Grid>
-          </SecureComponent>
-        )}
+        {/*          <ValuePair*/}
+        {/*            label={"Mode:"}*/}
+        {/*            value={*/}
+        {/*              <label*/}
+        {/*                className={"muted"}*/}
+        {/*                style={{ textTransform: "capitalize" }}*/}
+        {/*              >*/}
+        {/*                {retentionConfig && retentionConfig.mode*/}
+        {/*                  ? retentionConfig.mode*/}
+        {/*                  : "-"}*/}
+        {/*              </label>*/}
+        {/*            }*/}
+        {/*          />*/}
+        {/*          <ValuePair*/}
+        {/*            label={"Validity:"}*/}
+        {/*            value={*/}
+        {/*              <label*/}
+        {/*                className={"muted"}*/}
+        {/*                style={{ textTransform: "capitalize" }}*/}
+        {/*              >*/}
+        {/*                {retentionConfig && retentionConfig.validity}{" "}*/}
+        {/*                {retentionConfig &&*/}
+        {/*                  (retentionConfig.validity === 1*/}
+        {/*                    ? retentionConfig.unit?.slice(0, -1)*/}
+        {/*                    : retentionConfig.unit)}*/}
+        {/*              </label>*/}
+        {/*            }*/}
+        {/*          />*/}
+        {/*        </Box>*/}
+        {/*      </Box>*/}
+        {/*    </Grid>*/}
+        {/*  </SecureComponent>*/}
+        {/*)}*/}
       </Grid>
     </Fragment>
   );

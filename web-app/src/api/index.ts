@@ -1,7 +1,8 @@
 import { Api, HttpResponse, FullRequestParams, ApiError } from "./consoleApi";
 
+export const ServerHost = "http://localhost:8001";
 export let api = new Api();
-api.baseUrl = `${new URL(document.baseURI).pathname}api/v1`;
+api.baseUrl = ServerHost;
 const internalRequestFunc = api.request;
 api.request = async <T = any, E = any>({
   body,

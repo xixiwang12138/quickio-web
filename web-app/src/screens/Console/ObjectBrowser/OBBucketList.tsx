@@ -142,27 +142,27 @@ const OBListBuckets = () => {
             />
           )}
 
-          <Grid
-            item
-            xs={12}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              gap: 8,
-            }}
-          >
-            <TooltipWrapper tooltip={"Refresh"}>
-              <Button
-                id={"refresh-buckets"}
-                onClick={() => {
-                  setLoading(true);
-                }}
-                icon={<RefreshIcon />}
-                variant={"regular"}
-              />
-            </TooltipWrapper>
-          </Grid>
+          {/*<Grid*/}
+          {/*  item*/}
+          {/*  xs={12}*/}
+          {/*  sx={{*/}
+          {/*    display: "flex",*/}
+          {/*    alignItems: "center",*/}
+          {/*    justifyContent: "flex-end",*/}
+          {/*    gap: 8,*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  <TooltipWrapper tooltip={"Refresh"}>*/}
+          {/*    <Button*/}
+          {/*      id={"refresh-buckets"}*/}
+          {/*      onClick={() => {*/}
+          {/*        setLoading(true);*/}
+          {/*      }}*/}
+          {/*      icon={<RefreshIcon />}*/}
+          {/*      variant={"regular"}*/}
+          {/*    />*/}
+          {/*  </TooltipWrapper>*/}
+          {/*</Grid>*/}
         </Grid>
 
         {loading && <ProgressBar />}

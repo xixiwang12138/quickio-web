@@ -55,9 +55,11 @@ export const objectBrowserWSMiddleware = (
     );
     const bucketName = get(storeState, "objectBrowser.selectedBucket", "");
 
+    console.log("[trigger] ", action)
     const { type } = action;
     switch (type) {
       case "socket/OBConnect":
+        console.log("Connect ", action)
         const sessionInitialized = get(storeState, "system.loggedIn", false);
 
         if (wsInFlight || !sessionInitialized) {
@@ -66,18 +68,18 @@ export const objectBrowserWSMiddleware = (
 
         wsInFlight = true;
 
-        const url = new URL(window.location.toString());
-        const isDev = process.env.NODE_ENV === "development";
-        const port = isDev ? "9090" : url.port;
-
-        // check if we are using base path, if not this always is `/`
-        const baseLocation = new URL(document.baseURI);
-        const baseUrl = baseLocation.pathname;
-
-        const wsProt = wsProtocol(url.protocol);
+        // const url = new URL(window.location.toString());
+        // const isDev = process.env.NODE_ENV === "development";
+        // const port = isDev ? "9090" : url.port;
+        //
+        // // check if we are using base path, if not this always is `/`
+        // const baseLocation = new URL(document.baseURI);
+        // const baseUrl = baseLocation.pathname;
+        //
+        // const wsProt = wsProtocol(url.protocol);
 
         objectsWS = new WebSocket(
-          `${wsProt}://${url.hostname}:${port}${baseUrl}ws/objectManager`,
+          "ws://localhost:8001/ws/objectManager",
         );
 
         objectsWS.onopen = () => {

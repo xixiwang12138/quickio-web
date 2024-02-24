@@ -128,7 +128,7 @@ const ObjectDetailPanel = ({
   const [totalVersionsSize, setTotalVersionsSize] = useState<number>(0);
   const [longFileOpen, setLongFileOpen] = useState<boolean>(false);
   const [metaData, setMetaData] = useState<any | null>(null);
-  const [loadMetadata, setLoadingMetadata] = useState<boolean>(false);
+  // const [loadMetadata, setLoadingMetadata] = useState<boolean>(false);
 
   const internalPathsDecoded = decodeURLString(internalPaths) || "";
   const allPathData = internalPathsDecoded.split("/");
@@ -151,11 +151,6 @@ const ObjectDetailPanel = ({
             (el: BucketObject) => el.version_id === selectedVersion,
           ) || emptyFile;
       }
-
-      if (!infoElement.is_delete_marker) {
-        setLoadingMetadata(true);
-      }
-
       setActualInfo(infoElement);
     }
   }, [selectedVersion, distributedSetup, allInfoElements]);
@@ -189,10 +184,6 @@ const ObjectDetailPanel = ({
 
             setActualInfo(resInfo);
             setVersions([]);
-
-            if (!resInfo.is_delete_marker) {
-              setLoadingMetadata(true);
-            }
           }
 
           dispatch(setLoadingObjectInfo(false));
@@ -211,24 +202,24 @@ const ObjectDetailPanel = ({
     selectedVersion,
   ]);
 
-  useEffect(() => {
-    if (loadMetadata && internalPaths !== "") {
-      api.buckets
-        .getObjectMetadata(bucketName, {
-          prefix: internalPaths,
-        })
-        .then((res) => {
-          let metadata = get(res.data, "objectMetadata", {});
-
-          setMetaData(metadata);
-          setLoadingMetadata(false);
-        })
-        .catch((err) => {
-          console.error("Error Getting Metadata Status: ", err.detailedError);
-          setLoadingMetadata(false);
-        });
-    }
-  }, [bucketName, internalPaths, loadMetadata]);
+  // useEffect(() => {
+  //   if (loadMetadata && internalPaths !== "") {
+  //     api.buckets
+  //       .getObjectMetadata(bucketName, {
+  //         prefix: internalPaths,
+  //       })
+  //       .then((res) => {
+  //         let metadata = get(res.data, "objectMetadata", {});
+  //
+  //         setMetaData(metadata);
+  //         setLoadingMetadata(false);
+  //       })
+  //       .catch((err) => {
+  //         console.error("Error Getting Metadata Status: ", err.detailedError);
+  //         setLoadingMetadata(false);
+  //       });
+  //   }
+  // }, [bucketName, internalPaths, loadMetadata]);
 
   let tagKeys: string[] = [];
 
@@ -386,67 +377,22 @@ const ObjectDetailPanel = ({
             "share this object",
           ),
     },
-    {
-      action: () => {
-        setPreviewOpen(true);
-      },
-      label: "Preview",
-      disabled:
-        !!actualInfo.is_delete_marker ||
-        (objectType === "none" && !canGetObject),
-      icon: <PreviewIcon />,
-      tooltip: canGetObject
-        ? "Preview this File"
-        : permissionTooltipHelper(
-            [IAM_SCOPES.S3_GET_OBJECT, IAM_SCOPES.S3_GET_ACTIONS],
-            "preview this object",
-          ),
-    },
-    {
-      action: () => {
-        setLegalholdOpen(true);
-      },
-      label: "Legal Hold",
-      disabled:
-        !locking ||
-        !distributedSetup ||
-        !!actualInfo.is_delete_marker ||
-        !canSetLegalHold ||
-        selectedVersion !== "",
-      icon: <LegalHoldIcon />,
-      tooltip: canSetLegalHold
-        ? locking
-          ? "Change Legal Hold rules for this File"
-          : "Object Locking must be enabled on this bucket in order to set Legal Hold"
-        : permissionTooltipHelper(
-            [IAM_SCOPES.S3_PUT_OBJECT_LEGAL_HOLD, IAM_SCOPES.S3_PUT_ACTIONS],
-            "change legal hold settings for this object",
-          ),
-    },
-    {
-      action: openRetentionModal,
-      label: "Retention",
-      disabled:
-        !distributedSetup ||
-        !!actualInfo.is_delete_marker ||
-        !canChangeRetention ||
-        selectedVersion !== "" ||
-        !locking,
-      icon: <RetentionIcon />,
-      tooltip: canChangeRetention
-        ? locking
-          ? "Change Retention rules for this File"
-          : "Object Locking must be enabled on this bucket in order to set Retention Rules"
-        : permissionTooltipHelper(
-            [
-              IAM_SCOPES.S3_GET_OBJECT_RETENTION,
-              IAM_SCOPES.S3_PUT_OBJECT_RETENTION,
-              IAM_SCOPES.S3_GET_ACTIONS,
-              IAM_SCOPES.S3_PUT_ACTIONS,
-            ],
-            "change Retention Rules for this object",
-          ),
-    },
+    // {
+    //   action: () => {
+    //     setPreviewOpen(true);
+    //   },
+    //   label: "Preview",
+    //   disabled:
+    //     !!actualInfo.is_delete_marker ||
+    //     (objectType === "none" && !canGetObject),
+    //   icon: <PreviewIcon />,
+    //   tooltip: canGetObject
+    //     ? "Preview this File"
+    //     : permissionTooltipHelper(
+    //         [IAM_SCOPES.S3_GET_OBJECT, IAM_SCOPES.S3_GET_ACTIONS],
+    //         "preview this object",
+    //       ),
+    // },
     {
       action: () => {
         setTagModalOpen(true);
@@ -465,54 +411,6 @@ const ObjectDetailPanel = ({
               IAM_SCOPES.S3_PUT_ACTIONS,
             ],
             "set Tags on this object",
-          ),
-    },
-    {
-      action: () => {
-        setInspectModalOpen(true);
-      },
-      label: "Inspect",
-      disabled:
-        !distributedSetup ||
-        !!actualInfo.is_delete_marker ||
-        selectedVersion !== "" ||
-        !canInspect,
-      icon: <InspectMenuIcon />,
-      tooltip: canInspect
-        ? "Inspect this file"
-        : permissionTooltipHelper(
-            [IAM_SCOPES.ADMIN_INSPECT_DATA],
-            "inspect this file",
-          ),
-    },
-    {
-      action: () => {
-        dispatch(
-          setVersionsModeEnabled({
-            status: !versionsMode,
-            objectName: objectName,
-          }),
-        );
-      },
-      label: versionsMode ? "Hide Object Versions" : "Display Object Versions",
-      icon: <VersionsIcon />,
-      disabled:
-        !distributedSetup ||
-        !(actualInfo.version_id && actualInfo.version_id !== "null") ||
-        !canChangeVersioning,
-      tooltip: canChangeVersioning
-        ? actualInfo.version_id && actualInfo.version_id !== "null"
-          ? "Display Versions for this file"
-          : ""
-        : permissionTooltipHelper(
-            [
-              IAM_SCOPES.S3_GET_BUCKET_VERSIONING,
-              IAM_SCOPES.S3_PUT_BUCKET_VERSIONING,
-              IAM_SCOPES.S3_GET_OBJECT_VERSION,
-              IAM_SCOPES.S3_GET_ACTIONS,
-              IAM_SCOPES.S3_PUT_ACTIONS,
-            ],
-            "display all versions of this object",
           ),
     },
   ];
@@ -538,15 +436,6 @@ const ObjectDetailPanel = ({
           dataObject={objectToShare || actualInfo}
         />
       )}
-      {retentionModalOpen && actualInfo && (
-        <SetRetention
-          open={retentionModalOpen}
-          closeModalAndRefresh={closeRetentionModal}
-          objectName={currentItem}
-          objectInfo={actualInfo}
-          bucketName={bucketName}
-        />
-      )}
       {deleteOpen && (
         <DeleteObject
           deleteOpen={deleteOpen}
@@ -555,15 +444,6 @@ const ObjectDetailPanel = ({
           closeDeleteModalAndRefresh={closeDeleteModal}
           versioningInfo={distributedSetup ? versioningInfo : undefined}
           selectedVersion={selectedVersion}
-        />
-      )}
-      {legalholdOpen && actualInfo && (
-        <SetLegalHoldModal
-          open={legalholdOpen}
-          closeModalAndRefresh={closeLegalholdModal}
-          objectName={actualInfo.name || ""}
-          bucketName={bucketName}
-          actualInfo={actualInfo}
         />
       )}
       {previewOpen && actualInfo && (
@@ -582,14 +462,6 @@ const ObjectDetailPanel = ({
           bucketName={bucketName}
           actualInfo={actualInfo}
           onCloseAndUpdate={closeAddTagModal}
-        />
-      )}
-      {inspectModalOpen && actualInfo && (
-        <InspectObject
-          inspectOpen={inspectModalOpen}
-          volumeName={bucketName}
-          inspectPath={actualInfo.name || ""}
-          closeInspectModalAndRefresh={closeInspectModal}
         />
       )}
       {longFileOpen && actualInfo && (
@@ -743,60 +615,6 @@ const ObjectDetailPanel = ({
                   );
                 })}
           </Box>
-          <Box className={"detailContainer"}>
-            <SecureComponent
-              scopes={[
-                IAM_SCOPES.S3_GET_OBJECT_LEGAL_HOLD,
-                IAM_SCOPES.S3_GET_ACTIONS,
-              ]}
-              resource={bucketName}
-            >
-              <Fragment>
-                <strong>Legal Hold:</strong>
-                <br />
-                {actualInfo.legal_hold_status ? "On" : "Off"}
-              </Fragment>
-            </SecureComponent>
-          </Box>
-          <Box className={"detailContainer"}>
-            <SecureComponent
-              scopes={[
-                IAM_SCOPES.S3_GET_OBJECT_RETENTION,
-                IAM_SCOPES.S3_GET_ACTIONS,
-              ]}
-              resource={bucketName}
-            >
-              <Fragment>
-                <strong>Retention Policy:</strong>
-                <br />
-                <span className={"capitalizeFirst"}>
-                  {actualInfo.version_id && actualInfo.version_id !== "null" ? (
-                    <Fragment>
-                      {actualInfo.retention_mode
-                        ? actualInfo.retention_mode.toLowerCase()
-                        : "None"}
-                    </Fragment>
-                  ) : (
-                    <Fragment>
-                      {actualInfo.retention_mode
-                        ? actualInfo.retention_mode.toLowerCase()
-                        : "None"}
-                    </Fragment>
-                  )}
-                </span>
-              </Fragment>
-            </SecureComponent>
-          </Box>
-          {!actualInfo.is_delete_marker && (
-            <Fragment>
-              <SimpleHeader label={"Metadata"} icon={<MetadataIcon />} />
-              <Box className={"detailContainer"}>
-                {actualInfo && metaData ? (
-                  <ObjectMetaData metaData={metaData} />
-                ) : null}
-              </Box>
-            </Fragment>
-          )}
         </Box>
       )}
     </Fragment>

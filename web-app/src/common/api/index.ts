@@ -19,6 +19,7 @@ import get from "lodash/get";
 import { clearSession } from "../utils";
 import { ErrorResponseHandler } from "../types";
 import { baseUrl } from "../../history";
+import {ServerHost} from "../../api";
 
 type RequestHeaders = { [name: string]: string };
 
@@ -28,6 +29,7 @@ export class API {
     if (targetURL[0] === "/") {
       targetURL = targetURL.slice(1);
     }
+    targetURL = ServerHost+"/"+targetURL;
     let req = request(method, targetURL);
 
     if (headers) {

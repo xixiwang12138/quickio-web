@@ -1822,7 +1822,7 @@ export class Api<
      */
     login: (body: LoginRequest, params: RequestParams = {}) =>
       this.request<void, ApiError>({
-        path: `/login`,
+        path: `/user/login`,
         method: "POST",
         body: body,
         type: ContentType.Json,
@@ -2076,13 +2076,36 @@ export class Api<
       params: RequestParams = {},
     ) =>
       this.request<ListObjectsResponse, ApiError>({
-        path: `/buckets/${bucketName}/objects`,
+        path: `/bucket/${bucketName}/objects/detail`,
         method: "GET",
         query: query,
         secure: true,
         format: "json",
-        ...params,
+        ...params
       }),
+
+    // 以prefix分页查询某个buckey的对象列表
+    pageListObjects: (
+        bucketName: string,
+        query: {
+          prefix: string;
+          before: number;
+          /**
+           * @format int32
+           * @default 20
+           */
+          limit?: number;
+        },
+        params: RequestParams = {},
+    ) =>
+        this.request<[], ApiError>({
+          path: `/bucket/${bucketName}/objects`,
+          method: "GET",
+          query: query,
+          secure: true,
+          format: "json",
+          ...params,
+        }),
 
     /**
      * No description

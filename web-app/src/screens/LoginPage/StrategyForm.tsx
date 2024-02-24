@@ -260,16 +260,16 @@ const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
             </Grid>
           </Fragment>
         )}
-        <Grid item xs={12} sx={{ marginTop: 45 }}>
-          <Select
-            id="alternativeMethods"
-            name="alternativeMethods"
-            fixedLabel="Other Authentication Methods"
-            options={selectOptions}
-            onChange={extraActionSelector}
-            value={""}
-          />
-        </Grid>
+        {/*<Grid item xs={12} sx={{ marginTop: 45 }}>*/}
+        {/*  <Select*/}
+        {/*    id="alternativeMethods"*/}
+        {/*    name="alternativeMethods"*/}
+        {/*    fixedLabel="Other Authentication Methods"*/}
+        {/*    options={selectOptions}*/}
+        {/*    onChange={extraActionSelector}*/}
+        {/*    value={""}*/}
+        {/*  />*/}
+        {/*</Grid>*/}
       </form>
     </React.Fragment>
   );

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { listModeColumns, rewindModeColumns } from "./ListObjectsHelpers";
 import { useSelector } from "react-redux";
 import { AppState, useAppDispatch } from "../../../../../../store";
@@ -39,6 +39,7 @@ import { hasPermission } from "../../../../../../common/SecureComponent";
 import { downloadObject } from "../../../../ObjectBrowser/utils";
 import { DataTable, ItemActions } from "mds";
 import { BucketObject } from "api/consoleApi";
+import {api} from "../../../../../../api";
 
 const ListObjectsTable = () => {
   const dispatch = useAppDispatch();
@@ -208,6 +209,23 @@ const ListObjectsTable = () => {
     customPaperHeight = "calc(100vh - 315px)";
   }
 
+
+  const [allRecords, setAllRecords] = useState<[]>([]);
+
+  const fetchObjects = async ()=>{
+   return  await api.buckets.pageListObjects(bucketName, {
+      prefix: "",
+      before: new Date().getTime(),
+      limit: 20,
+    })
+  }
+  useEffect(()=>{
+      fetchObjects().then((res)=>{
+          const result: [] = res.data || [];
+          setAllRecords(result)
+      })
+  }, [])
+
   return (
     <DataTable
       itemActions={tableActions}
@@ -215,7 +233,7 @@ const ListObjectsTable = () => {
       isLoading={requestInProgress}
       entityName="Objects"
       idField="name"
-      records={payload}
+      records={allRecords}
       customPaperHeight={customPaperHeight}
       selectedItems={selectedObjects}
       onSelect={!anonymousMode ? selectListObjects : undefined}

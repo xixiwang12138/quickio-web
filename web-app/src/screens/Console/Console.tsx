@@ -127,9 +127,9 @@ const ConfigurationOptions = React.lazy(
 );
 
 const AddGroupScreen = React.lazy(() => import("./Groups/AddGroupScreen"));
-const SiteReplication = React.lazy(
-  () => import("./Configurations/SiteReplication/SiteReplication"),
-);
+// const SiteReplication = React.lazy(
+//   () => import("./Configurations/SiteReplication/SiteReplication"),
+// );
 const SiteReplicationStatus = React.lazy(
   () => import("./Configurations/SiteReplication/SiteReplicationStatus"),
 );
@@ -228,10 +228,10 @@ const Console = () => {
       path: IAM_PAGES.BUCKETS,
       forceDisplay: true,
     },
-    {
-      component: Dashboard,
-      path: IAM_PAGES.DASHBOARD,
-    },
+    // {
+    //   component: Dashboard,
+    //   path: IAM_PAGES.DASHBOARD,
+    // },
     {
       component: Buckets,
       path: IAM_PAGES.ADD_BUCKETS,
@@ -239,16 +239,16 @@ const Console = () => {
         return hasPermission("*", IAM_PAGES_PERMISSIONS[IAM_PAGES.ADD_BUCKETS]);
       },
     },
-    {
-      component: EditBucketReplication,
-      path: IAM_PAGES.BUCKETS_EDIT_REPLICATION,
-      customPermissionFnc: () => {
-        return hasPermission(
-          "*",
-          IAM_PAGES_PERMISSIONS[IAM_PAGES.BUCKETS_EDIT_REPLICATION],
-        );
-      },
-    },
+    // {
+    //   component: EditBucketReplication,
+    //   path: IAM_PAGES.BUCKETS_EDIT_REPLICATION,
+    //   customPermissionFnc: () => {
+    //     return hasPermission(
+    //       "*",
+    //       IAM_PAGES_PERMISSIONS[IAM_PAGES.BUCKETS_EDIT_REPLICATION],
+    //     );
+    //   },
+    // },
     {
       component: Buckets,
       path: IAM_PAGES.BUCKETS_ADMIN_VIEW,
@@ -266,162 +266,166 @@ const Console = () => {
       },
     },
 
-    {
-      component: Watch,
-      path: IAM_PAGES.TOOLS_WATCH,
-    },
-    {
-      component: Speedtest,
-      path: IAM_PAGES.TOOLS_SPEEDTEST,
-    },
-    {
-      component: Users,
-      path: IAM_PAGES.USERS,
-      fsHidden: ldapIsEnabled,
-      customPermissionFnc: () =>
-        hasPermission(CONSOLE_UI_RESOURCE, [IAM_SCOPES.ADMIN_LIST_USERS]) ||
-        hasPermission(S3_ALL_RESOURCES, [IAM_SCOPES.ADMIN_CREATE_USER]),
-    },
-    {
-      component: Groups,
-      path: IAM_PAGES.GROUPS,
-      fsHidden: ldapIsEnabled,
-    },
-    {
-      component: AddGroupScreen,
-      path: IAM_PAGES.GROUPS_ADD,
-    },
-    {
-      component: GroupsDetails,
-      path: IAM_PAGES.GROUPS_VIEW,
-    },
-    {
-      component: Policies,
-      path: IAM_PAGES.POLICIES_VIEW,
-    },
-    {
-      component: AddPolicyScreen,
-      path: IAM_PAGES.POLICY_ADD,
-    },
-    {
-      component: Policies,
-      path: IAM_PAGES.POLICIES,
-    },
-    {
-      component: IDPLDAPConfigurationDetails,
-      path: IAM_PAGES.IDP_LDAP_CONFIGURATIONS,
-    },
-    {
-      component: IDPOpenIDConfigurations,
-      path: IAM_PAGES.IDP_OPENID_CONFIGURATIONS,
-    },
-    {
-      component: AddIDPOpenIDConfiguration,
-      path: IAM_PAGES.IDP_OPENID_CONFIGURATIONS_ADD,
-    },
-    {
-      component: IDPOpenIDConfigurationDetails,
-      path: IAM_PAGES.IDP_OPENID_CONFIGURATIONS_VIEW,
-    },
-    {
-      component: Trace,
-      path: IAM_PAGES.TOOLS_TRACE,
-    },
-    {
-      component: HealthInfo,
-      path: IAM_PAGES.TOOLS_DIAGNOSTICS,
-    },
-    {
-      component: ErrorLogs,
-      path: IAM_PAGES.TOOLS_LOGS,
-    },
-    {
-      component: LogsSearchMain,
-      path: IAM_PAGES.TOOLS_AUDITLOGS,
-    },
-    {
-      component: Tools,
-      path: IAM_PAGES.TOOLS,
-    },
-    {
-      component: ConfigurationOptions,
-      path: IAM_PAGES.SETTINGS,
-    },
-    {
-      component: AddEventDestination,
-      path: IAM_PAGES.EVENT_DESTINATIONS_ADD_SERVICE,
-    },
-    {
-      component: EventTypeSelector,
-      path: IAM_PAGES.EVENT_DESTINATIONS_ADD,
-    },
-    {
-      component: EventDestinations,
-      path: IAM_PAGES.EVENT_DESTINATIONS,
-    },
-    {
-      component: AddTierConfiguration,
-      path: IAM_PAGES.TIERS_ADD_SERVICE,
-      fsHidden: !distributedSetup,
-    },
-    {
-      component: TierTypeSelector,
-      path: IAM_PAGES.TIERS_ADD,
-      fsHidden: !distributedSetup,
-    },
-    {
-      component: ListTiersConfiguration,
-      path: IAM_PAGES.TIERS,
-    },
-    {
-      component: SiteReplication,
-      path: IAM_PAGES.SITE_REPLICATION,
-    },
-    {
-      component: SiteReplicationStatus,
-      path: IAM_PAGES.SITE_REPLICATION_STATUS,
-    },
-    {
-      component: AddReplicationSites,
-      path: IAM_PAGES.SITE_REPLICATION_ADD,
-    },
-    {
-      component: Account,
-      path: IAM_PAGES.ACCOUNT,
-      forceDisplay: true,
-      // user has implicit access to service-accounts
-    },
-    {
-      component: AccountCreate,
-      path: IAM_PAGES.ACCOUNT_ADD,
-      forceDisplay: true, // user has implicit access to service-accounts
-    },
-    {
-      component: License,
-      path: IAM_PAGES.LICENSE,
-      forceDisplay: true,
-    },
-    {
-      component: KMSRoutes,
-      path: IAM_PAGES.KMS,
-      fsHidden: !kmsIsEnabled,
-    },
+    // {
+    //   component: Watch,
+    //   path: IAM_PAGES.TOOLS_WATCH,
+    // },
+    // {
+    //   component: Speedtest,
+    //   path: IAM_PAGES.TOOLS_SPEEDTEST,
+    // },
+    // {
+    //   component: Users,
+    //   path: IAM_PAGES.USERS,
+    //   fsHidden: ldapIsEnabled,
+    //   customPermissionFnc: () =>
+    //     hasPermission(CONSOLE_UI_RESOURCE, [IAM_SCOPES.ADMIN_LIST_USERS]) ||
+    //     hasPermission(S3_ALL_RESOURCES, [IAM_SCOPES.ADMIN_CREATE_USER]),
+    // },
+    // {
+    //   component: Groups,
+    //   path: IAM_PAGES.GROUPS,
+    //   fsHidden: ldapIsEnabled,
+    // },
+    // {
+    //   component: AddGroupScreen,
+    //   path: IAM_PAGES.GROUPS_ADD,
+    // },
+    // {
+    //   component: GroupsDetails,
+    //   path: IAM_PAGES.GROUPS_VIEW,
+    // },
+    // {
+    //   component: Policies,
+    //   path: IAM_PAGES.POLICIES_VIEW,
+    // },
+    // {
+    //   component: AddPolicyScreen,
+    //   path: IAM_PAGES.POLICY_ADD,
+    // },
+    // {
+    //   component: Policies,
+    //   path: IAM_PAGES.POLICIES,
+    // },
+    // {
+    //   component: IDPLDAPConfigurationDetails,
+    //   path: IAM_PAGES.IDP_LDAP_CONFIGURATIONS,
+    // },
+    // {
+    //   component: IDPOpenIDConfigurations,
+    //   path: IAM_PAGES.IDP_OPENID_CONFIGURATIONS,
+    // },
+    // {
+    //   component: AddIDPOpenIDConfiguration,
+    //   path: IAM_PAGES.IDP_OPENID_CONFIGURATIONS_ADD,
+    // },
+    // {
+    //   component: IDPOpenIDConfigurationDetails,
+    //   path: IAM_PAGES.IDP_OPENID_CONFIGURATIONS_VIEW,
+    // },
+    // {
+    //   component: Trace,
+    //   path: IAM_PAGES.TOOLS_TRACE,
+    // },
+    // {
+    //   component: HealthInfo,
+    //   path: IAM_PAGES.TOOLS_DIAGNOSTICS,
+    // },
+    // {
+    //   component: ErrorLogs,
+    //   path: IAM_PAGES.TOOLS_LOGS,
+    // },
+    // {
+    //   component: LogsSearchMain,
+    //   path: IAM_PAGES.TOOLS_AUDITLOGS,
+    // },
+    // {
+    //   component: Tools,
+    //   path: IAM_PAGES.TOOLS,
+    // },
+    // {
+    //   component: ConfigurationOptions,
+    //   path: IAM_PAGES.SETTINGS,
+    // },
+    // {
+    //   component: AddEventDestination,
+    //   path: IAM_PAGES.EVENT_DESTINATIONS_ADD_SERVICE,
+    // },
+    // {
+    //   component: EventTypeSelector,
+    //   path: IAM_PAGES.EVENT_DESTINATIONS_ADD,
+    // },
+    // {
+    //   component: EventDestinations,
+    //   path: IAM_PAGES.EVENT_DESTINATIONS,
+    // },
+    // {
+    //   component: AddTierConfiguration,
+    //   path: IAM_PAGES.TIERS_ADD_SERVICE,
+    //   fsHidden: !distributedSetup,
+    // },
+    // {
+    //   component: TierTypeSelector,
+    //   path: IAM_PAGES.TIERS_ADD,
+    //   fsHidden: !distributedSetup,
+    // },
+    // {
+    //   component: ListTiersConfiguration,
+    //   path: IAM_PAGES.TIERS,
+    // },
+    // {
+    //   component: SiteReplication,
+    //   path: IAM_PAGES.SITE_REPLICATION,
+    // },
+    // {
+    //   component: SiteReplicationStatus,
+    //   path: IAM_PAGES.SITE_REPLICATION_STATUS,
+    // },
+    // {
+    //   component: AddReplicationSites,
+    //   path: IAM_PAGES.SITE_REPLICATION_ADD,
+    // },
+    // {
+    //   component: Account,
+    //   path: IAM_PAGES.ACCOUNT,
+    //   forceDisplay: true,
+    //   // user has implicit access to service-accounts
+    // },
+    // {
+    //   component: AccountCreate,
+    //   path: IAM_PAGES.ACCOUNT_ADD,
+    //   forceDisplay: true, // user has implicit access to service-accounts
+    // },
+    // {
+    //   component: License,
+    //   path: IAM_PAGES.LICENSE,
+    //   forceDisplay: true,
+    // },
+    // {
+    //   component: KMSRoutes,
+    //   path: IAM_PAGES.KMS,
+    //   fsHidden: !kmsIsEnabled,
+    // },
   ];
 
   let routes = consoleAdminRoutes;
 
-  const allowedRoutes = routes.filter((route: any) =>
-    obOnly
-      ? route.path.includes("browser")
-      : (route.forceDisplay ||
-          (route.customPermissionFnc
-            ? route.customPermissionFnc()
-            : hasPermission(
-                CONSOLE_UI_RESOURCE,
-                IAM_PAGES_PERMISSIONS[route.path],
-              ))) &&
-        !route.fsHidden,
-  );
+  // const allowedRoutes = routes.filter((route: any) =>
+  //   obOnly
+  //     ? route.path.includes("browser")
+  //     : (route.forceDisplay ||
+  //         (route.customPermissionFnc
+  //           ? route.customPermissionFnc()
+  //           : hasPermission(
+  //               CONSOLE_UI_RESOURCE,
+  //               IAM_PAGES_PERMISSIONS[route.path],
+  //             ))) &&
+  //       !route.fsHidden,
+  // );
+
+  const allowedRoutes = routes;
+
+  console.log(allowedRoutes);
 
   const closeSnackBar = () => {
     setOpenSnackbar(false);

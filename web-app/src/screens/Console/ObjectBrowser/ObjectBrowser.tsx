@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Suspense } from "react";
+import React, {Suspense, useEffect} from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { IAM_PAGES } from "../../../common/SecureComponent/permissions";
 import LoadingComponent from "../../../common/LoadingComponent";
@@ -29,6 +29,9 @@ const AddBucket = React.lazy(
 );
 
 const ObjectBrowser = () => {
+    useEffect(()=>{
+        console.log("===================> ObjectBrowser")
+    })
   return (
     <Routes>
       <Route

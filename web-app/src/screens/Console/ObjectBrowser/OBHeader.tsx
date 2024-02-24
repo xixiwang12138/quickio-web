@@ -158,7 +158,7 @@ const OBHeader = ({ bucketName }: IOBHeader) => {
                   />
                 </TooltipWrapper>
               </SecureComponent>
-              <HelpMenu />
+              {/*<HelpMenu />*/}
             </Fragment>
           }
           middleComponent={searchBar}
@@ -182,7 +182,7 @@ const OBHeader = ({ bucketName }: IOBHeader) => {
             }}
           >
             {searchBar}
-            <ObjectManagerButton />
+            {/*<ObjectManagerButton />*/}
           </Grid>
         </Grid>
       )}

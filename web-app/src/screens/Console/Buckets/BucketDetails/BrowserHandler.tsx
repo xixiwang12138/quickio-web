@@ -143,11 +143,11 @@ const BrowserHandler = () => {
     ],
   );
 
-  useEffect(() => {
-    return () => {
-      dispatch({ type: "socket/OBCancelLast" });
-    };
-  }, [dispatch]);
+  // useEffect(() => {
+  //   return () => {
+  //     dispatch({ type: "socket/OBCancelLast" });
+  //   };
+  // }, [dispatch]);
 
   // Object Details handler
   useEffect(() => {
@@ -183,63 +183,63 @@ const BrowserHandler = () => {
     }
   }, [reloadObjectsList, records, requestInProgress, pathLoad]);
 
-  const displayListObjects =
-    hasPermission(bucketName, [
-      IAM_SCOPES.S3_LIST_BUCKET,
-      IAM_SCOPES.S3_ALL_LIST_BUCKET,
-    ]) || anonymousMode;
+  // const displayListObjects =
+  //   hasPermission(bucketName, [
+  //     IAM_SCOPES.S3_LIST_BUCKET,
+  //     IAM_SCOPES.S3_ALL_LIST_BUCKET,
+  //   ]) || anonymousMode;
 
-  useEffect(() => {
-    if (loadingVersioning && !anonymousMode) {
-      if (displayListObjects) {
-        api.buckets
-          .getBucketVersioning(bucketName)
-          .then((res) => {
-            dispatch(setIsVersioned(res.data));
-            dispatch(setLoadingVersioning(false));
-          })
-          .catch((err) => {
-            console.error(
-              "Error Getting Object Versioning Status: ",
-              err.error.detailedMessage,
-            );
-            dispatch(setLoadingVersioning(false));
-          });
-      } else {
-        dispatch(setLoadingVersioning(false));
-        dispatch(resetMessages());
-      }
-    }
-  }, [
-    bucketName,
-    loadingVersioning,
-    dispatch,
-    displayListObjects,
-    anonymousMode,
-  ]);
+  // useEffect(() => {
+  //   if (loadingVersioning && !anonymousMode) {
+  //     if (displayListObjects) {
+  //       api.buckets
+  //         .getBucketVersioning(bucketName)
+  //         .then((res) => {
+  //           dispatch(setIsVersioned(res.data));
+  //           dispatch(setLoadingVersioning(false));
+  //         })
+  //         .catch((err) => {
+  //           console.error(
+  //             "Error Getting Object Versioning Status: ",
+  //             err.error.detailedMessage,
+  //           );
+  //           dispatch(setLoadingVersioning(false));
+  //         });
+  //     } else {
+  //       dispatch(setLoadingVersioning(false));
+  //       dispatch(resetMessages());
+  //     }
+  //   }
+  // }, [
+  //   bucketName,
+  //   loadingVersioning,
+  //   dispatch,
+  //   displayListObjects,
+  //   anonymousMode,
+  // ]);
 
-  useEffect(() => {
-    if (loadingLocking) {
-      if (displayListObjects) {
-        api.buckets
-          .getBucketObjectLockingStatus(bucketName)
-          .then((res) => {
-            dispatch(setLockingEnabled(res.data.object_locking_enabled));
-            dispatch(setLoadingLocking(false));
-          })
-          .catch((err) => {
-            console.error(
-              "Error Getting Object Locking Status: ",
-              err.error.detailedMessage,
-            );
-            dispatch(setLoadingLocking(false));
-          });
-      } else {
-        dispatch(resetMessages());
-        dispatch(setLoadingLocking(false));
-      }
-    }
-  }, [bucketName, loadingLocking, dispatch, displayListObjects]);
+  // useEffect(() => {
+  //   if (loadingLocking) {
+  //     if (displayListObjects) {
+  //       api.buckets
+  //         .getBucketObjectLockingStatus(bucketName)
+  //         .then((res) => {
+  //           dispatch(setLockingEnabled(res.data.object_locking_enabled));
+  //           dispatch(setLoadingLocking(false));
+  //         })
+  //         .catch((err) => {
+  //           console.error(
+  //             "Error Getting Object Locking Status: ",
+  //             err.error.detailedMessage,
+  //           );
+  //           dispatch(setLoadingLocking(false));
+  //         });
+  //     } else {
+  //       dispatch(resetMessages());
+  //       dispatch(setLoadingLocking(false));
+  //     }
+  //   }
+  // }, [bucketName, loadingLocking, dispatch, displayListObjects]);
 
   return (
     <Fragment>
