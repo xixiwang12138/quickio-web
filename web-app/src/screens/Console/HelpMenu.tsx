@@ -284,7 +284,7 @@ const HelpMenu = () => {
 
   return (
     <Fragment>
-      {helpMenuOpen && (
+      {false && (
         <HelpMenuContainer ref={wrapperRef}>
           <Tabs
             options={constructHMTabs()}
@@ -314,11 +314,11 @@ const HelpMenu = () => {
           />
         </HelpMenuContainer>
       )}
-      <Button
-        id={systemHelpName ?? "help_button"}
-        icon={<HelpIcon />}
-        onClick={toggleHelpMenu}
-      ></Button>
+      {/*<Button*/}
+      {/*  id={systemHelpName ?? "help_button"}*/}
+      {/*  icon={<HelpIcon />}*/}
+      {/*  onClick={toggleHelpMenu}*/}
+      {/*></Button>*/}
     </Fragment>
   );
 };
