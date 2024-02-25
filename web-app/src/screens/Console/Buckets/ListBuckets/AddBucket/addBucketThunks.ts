@@ -14,74 +14,43 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { getBytes } from "../../../../../common/utils";
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import { AppState } from "../../../../../store";
-import { api } from "../../../../../api";
+import {getBytes} from "../../../../../common/utils";
+import {createAsyncThunk} from "@reduxjs/toolkit";
+import {AppState} from "../../../../../store";
+import {api} from "../../../../../api";
 import {
-  MakeBucketRequest,
-  ObjectRetentionMode,
-  ObjectRetentionUnit,
+    MakeBucketRequest,
+    ObjectRetentionMode,
+    ObjectRetentionUnit,
 } from "../../../../../api/consoleApi";
+import {permission2Type} from "./AddBucket";
 
 export const addBucketAsync = createAsyncThunk(
-  "buckets/addBucketAsync",
-  async (_, { getState, rejectWithValue, dispatch }) => {
-    const state = getState() as AppState;
+    "buckets/addBucketAsync",
+    async (_, {getState, rejectWithValue, dispatch}) => {
+        const state = getState() as AppState;
 
-    const bucketName = state.addBucket.name;
-    const versioningEnabled = state.addBucket.versioningEnabled;
-    const lockingEnabled = state.addBucket.lockingEnabled;
-    const quotaEnabled = state.addBucket.quotaEnabled;
-    const quotaSize = state.addBucket.quotaSize;
-    const quotaUnit = state.addBucket.quotaUnit;
-    const retentionEnabled = state.addBucket.retentionEnabled;
-    const retentionMode = state.addBucket.retentionMode;
-    const retentionUnit = state.addBucket.retentionUnit;
-    const retentionValidity = state.addBucket.retentionValidity;
-    const distributedSetup = state.system.distributedSetup;
-    const siteReplicationInfo = state.system.siteReplicationInfo;
-    const excludeFolders = state.addBucket.excludeFolders;
-    const excludedPrefixes = state.addBucket.excludedPrefixes;
+        const bucketName = state.addBucket.name;
+        const quotaEnabled = state.addBucket.quotaEnabled;
+        const quotaSize = state.addBucket.quotaSize;
+        const quotaUnit = state.addBucket.quotaUnit;
 
-    let request: MakeBucketRequest = {
-      name: bucketName,
-      versioning: {
-        enabled:
-          distributedSetup && !siteReplicationInfo.enabled
-            ? versioningEnabled
-            : false,
-        excludePrefixes:
-          distributedSetup && !siteReplicationInfo.enabled && !lockingEnabled
-            ? excludedPrefixes.split(",").filter((item) => item.trim() !== "")
-            : [],
-        excludeFolders:
-          distributedSetup && !siteReplicationInfo.enabled && !lockingEnabled
-            ? excludeFolders
-            : false,
-      },
-      locking: distributedSetup ? lockingEnabled : false,
-    };
+        const aclType = state.addBucket.aclType
 
-    if (distributedSetup) {
-      if (quotaEnabled) {
-        const amount = getBytes(quotaSize, quotaUnit, true);
-        request.quota = {
-          enabled: true,
-          quota_type: "hard",
-          amount: parseInt(amount),
+        let request: MakeBucketRequest = {
+            name: bucketName,
+            permission: permission2Type(aclType),
         };
-      }
 
-      if (retentionEnabled) {
-        request.retention = {
-          mode: retentionMode as ObjectRetentionMode,
-          unit: retentionUnit as ObjectRetentionUnit,
-          validity: retentionValidity,
-        };
-      }
-    }
+        if (quotaEnabled) {
+            const amount = getBytes(quotaSize, quotaUnit, true);
+            request.quota = {
+                enabled: true,
+                quota_type: "hard",
+                amount: parseInt(amount),
+            };
+        }
 
-    return api.buckets.makeBucket(request);
-  },
+        return api.buckets.makeBucket(request);
+    },
 );

@@ -506,7 +506,7 @@ const ListObjects = () => {
             ) => {
                 let uploadPromise = (file: File) => {
                     return new Promise((resolve, reject) => {
-                        let uploadUrl = `/bucket/${bucketName}/objects/upload`;
+                        let uploadUrl = `/buckets/${bucketName}/objects/upload`;
                         const fileName = file.name;
 
                         const blobFile = new Blob([file], {type: file.type});

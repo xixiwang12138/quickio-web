@@ -83,7 +83,7 @@ export const download = (
     const state = store.getState();
     const anonymousMode = state.system.anonymousMode;
 
-    let path = `${api.baseUrl}/bucket/${bucketName}/objects/download`;
+    let path = `${api.baseUrl}/buckets/${bucketName}/objects/download`;
 
     // If file is greater than 50GiB then we force browser download, if not then we use HTTP Request for Object Manager
     if (fileSize > 53687091200) {

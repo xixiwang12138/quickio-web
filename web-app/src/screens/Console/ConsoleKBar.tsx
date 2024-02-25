@@ -31,7 +31,6 @@ const ConsoleKBar = () => {
   );
 
   useEffect(()=>{
-      console.log("ConsoleKBar")
   })
 
   // if we are hiding the menu also disable the k-bar so just return console

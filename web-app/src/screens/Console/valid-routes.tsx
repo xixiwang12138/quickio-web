@@ -156,7 +156,7 @@ export const validRoutes = (
             hasPermission(CONSOLE_UI_RESOURCE, [IAM_SCOPES.ADMIN_ALL_ACTIONS]),
           name: "Users",
           icon: <UsersMenuIcon />,
-          fsHidden: ldapIsEnabled,
+          forceDisplay: true
         },
         // {
         //   id: "groups",

@@ -144,16 +144,6 @@ const BucketListItem = ({
     hasPermission(bucket.name, IAM_PERMISSIONS[IAM_ROLES.BUCKET_ADMIN]) &&
     false;
 
-  const accessToStr = (bucket: Bucket): string => {
-    if (bucket.rw_access?.read && !bucket.rw_access?.write) {
-      return "R";
-    } else if (!bucket.rw_access?.read && bucket.rw_access?.write) {
-      return "W";
-    } else if (bucket.rw_access?.read && bucket.rw_access?.write) {
-      return "R/W";
-    }
-    return "";
-  };
   const onCheckboxClick = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSelect(e);
   };
@@ -209,19 +199,7 @@ const BucketListItem = ({
         <Grid
           item
           className={"metric"}
-          onMouseEnter={() =>
-            bucket.details?.versioning && setClickOverride(true)
-          }
-          onMouseLeave={() =>
-            bucket.details?.versioning && setClickOverride(false)
-          }
         >
-          {bucket.details?.versioning && (
-            <HelpTip content={usageClarifyingContent} placement="top">
-              <ReportedUsageIcon />{" "}
-            </HelpTip>
-          )}
-          {!bucket.details?.versioning && <ReportedUsageIcon />}
           <span className={"metricLabel"}>Usage</span>
           <div className={"metricText"}>
             {usageScalar}

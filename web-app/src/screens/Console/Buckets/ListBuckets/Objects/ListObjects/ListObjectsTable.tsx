@@ -23,7 +23,7 @@ import { encodeURLString } from "../../../../../../common/utils";
 import {
   setLoadingVersions,
   setObjectDetailsView,
-  setReloadObjectsList,
+  setReloadObjectsList, setRequestInProgress,
   setSelectedObjects,
   setSelectedObjectView,
 } from "../../../../ObjectBrowser/objectBrowserSlice";
@@ -213,6 +213,7 @@ const ListObjectsTable = () => {
   const [allRecords, setAllRecords] = useState<[]>([]);
 
   const fetchObjects = async ()=>{
+    dispatch(setRequestInProgress(true))
    return  await api.buckets.pageListObjects(bucketName, {
       prefix: "",
       before: new Date().getTime(),
@@ -223,6 +224,7 @@ const ListObjectsTable = () => {
       fetchObjects().then((res)=>{
           const result: [] = res.data || [];
           setAllRecords(result)
+        dispatch(setRequestInProgress(false))
       })
   }, [])
 

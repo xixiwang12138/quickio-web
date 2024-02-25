@@ -274,14 +274,14 @@ const Console = () => {
     //   component: Speedtest,
     //   path: IAM_PAGES.TOOLS_SPEEDTEST,
     // },
-    // {
-    //   component: Users,
-    //   path: IAM_PAGES.USERS,
-    //   fsHidden: ldapIsEnabled,
-    //   customPermissionFnc: () =>
-    //     hasPermission(CONSOLE_UI_RESOURCE, [IAM_SCOPES.ADMIN_LIST_USERS]) ||
-    //     hasPermission(S3_ALL_RESOURCES, [IAM_SCOPES.ADMIN_CREATE_USER]),
-    // },
+    {
+      component: Users,
+      path: IAM_PAGES.USERS,
+      fsHidden: ldapIsEnabled,
+      customPermissionFnc: () => true
+        // hasPermission(CONSOLE_UI_RESOURCE, [IAM_SCOPES.ADMIN_LIST_USERS]) ||
+        // hasPermission(S3_ALL_RESOURCES, [IAM_SCOPES.ADMIN_CREATE_USER]),
+    },
     // {
     //   component: Groups,
     //   path: IAM_PAGES.GROUPS,

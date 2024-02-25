@@ -107,7 +107,7 @@ const ListUsers = () => {
     if (loading) {
       if (displayListUsers) {
         api
-          .invoke("GET", `/api/v1/users`)
+          .invoke("GET", `/user/list`)
           .then((res: UsersList) => {
             const users = res.users === null ? [] : res.users;
 
