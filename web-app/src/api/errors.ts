@@ -27,7 +27,7 @@ export const errorToHandler = (e: ApiError): ErrorResponseHandler => {
     };
   }
   return {
-    errorMessage: e.message || "",
+    errorMessage: e.msg || "",
     detailedError: e.detailedMessage || "",
   };
 };

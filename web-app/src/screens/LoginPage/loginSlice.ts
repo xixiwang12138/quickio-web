@@ -30,6 +30,8 @@ export interface LoginState {
   isK8S: boolean;
   navigateTo: string;
   ssoEmbeddedIDPDisplay: boolean;
+
+
 }
 
 const initialState: LoginState = {

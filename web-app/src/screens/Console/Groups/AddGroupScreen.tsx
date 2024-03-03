@@ -196,26 +196,26 @@ const AddGroupScreen = () => {
                                 setGroupName(e.target.value);
                             }}
                         />
-                        <SelectRecord
+                        {(perm?.readable && <SelectRecord
                             selectedRecords={read}
                             select={setRead}
                             display={perm?.readable.map(value => value.resource_index)}
                             title={"授予仅读权限的bucket"}
-                        />
+                        />)}
 
-                        <SelectRecord
+                        {(perm?.writable && <SelectRecord
                             select={write}
                             selectedRecords={setWrite}
                             display={perm?.writable.map(value => value.resource_index)}
                             title={"授予读写权限的bucket"}
-                        />
+                        />)}
 
-                        <SelectRecord
+                        {(perm.manageable && <SelectRecord
                             select={manage}
                             selectedRecords={setManage}
                             display={perm?.manageable.map(value => value.resource_index)}
                             title={"授予管理权限的bucket"}
-                        />
+                        />)}
 
 
                         {

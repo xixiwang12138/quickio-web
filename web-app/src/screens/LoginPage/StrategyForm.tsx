@@ -36,10 +36,15 @@ import {
   setUseSTS,
 } from "./loginSlice";
 
+
 import { AppState, useAppDispatch } from "../../store";
 import { useSelector } from "react-redux";
-import { doLoginAsync } from "./loginThunks";
-import { RedirectRule } from "api/consoleApi";
+import {ApiError, RedirectRule} from "api/consoleApi";
+import {api} from "../../api";
+import {isDarkModeOn} from "../../utils/stylesUtils";
+import {setDarkMode, setErrorSnackMessage, userLogged} from "../../systemSlice";
+import {errorToHandler} from "../../api/errors";
+import {setLogsStarted} from "../Console/Logs/logsSlice";
 
 const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
   const dispatch = useAppDispatch();
@@ -63,7 +68,26 @@ const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
 
   const formSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    dispatch(doLoginAsync());
+    api.login
+        .login({
+          accessKey: accessKey,
+          secretKey: secretKey
+        })
+        .then((res) => {
+          const darkModeEnabled = isDarkModeOn(); // If null, then we set the dark mode as disabled per requirement. If configuration al ready set, then we establish this configuration
+
+          // We set the state in redux
+          dispatch(userLogged(true));
+          localStorage.setItem("userLoggedIn", accessKey);
+          localStorage.setItem("jwt", res.data.token);
+
+          dispatch(setDarkMode(!!darkModeEnabled));
+          window.location.href = '/browser';
+        })
+        .catch( (e) => {
+          console.log(e)
+          dispatch(setErrorSnackMessage(errorToHandler(e)));
+        });
   };
 
   let selectOptions = [

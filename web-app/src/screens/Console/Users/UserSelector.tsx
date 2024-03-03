@@ -27,7 +27,7 @@ const UserSelector = () => {
     <InputBox
       id="accesskey-input"
       name="accesskey-input"
-      label="User Name"
+      label="用户名"
       value={userName}
       autoFocus={true}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

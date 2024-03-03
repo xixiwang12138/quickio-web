@@ -31,7 +31,7 @@ const PasswordSelector = () => {
       id="standard-multiline-static"
       name="standard-multiline-static"
       type="password"
-      label="Password"
+      label="密码"
       value={secretKey}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
         dispatch(setSecretKey(e.target.value));

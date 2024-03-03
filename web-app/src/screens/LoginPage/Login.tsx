@@ -28,13 +28,6 @@ import StrategyForm from "./StrategyForm";
 
 export const getTargetPath = () => {
     let targetPath = "/browser";
-    if (
-        localStorage.getItem("redirect-path") &&
-        localStorage.getItem("redirect-path") !== ""
-    ) {
-        targetPath = `${localStorage.getItem("redirect-path")}`;
-        localStorage.setItem("redirect-path", "");
-    }
     return targetPath;
 };
 

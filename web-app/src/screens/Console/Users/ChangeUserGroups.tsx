@@ -30,7 +30,7 @@ import { encodeURLString } from "../../../common/utils";
 import { setModalErrorSnackMessage } from "../../../systemSlice";
 import { useAppDispatch } from "../../../store";
 import api from "../../../common/api";
-import GroupsSelectors from "./GroupsSelectors";
+import RolesSelectors from "./RolesSelectors";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
 
 interface IChangeUserGroupsContentProps {
@@ -151,8 +151,9 @@ const ChangeUserGroups = ({
           }}
         >
           <FormLayout withBorders={false} containerPadding={false}>
-            <GroupsSelectors
-              selectedGroups={selectedGroups}
+            <RolesSelectors
+                shouldCreatedByMe={false}
+              selectedRoleIds={selectedGroups}
               setSelectedGroups={(elements: string[]) => {
                 setSelectedGroups(elements);
               }}

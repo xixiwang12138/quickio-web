@@ -23,40 +23,41 @@ import { GroupsList } from "../Groups/types";
 import { ErrorResponseHandler } from "../../../common/types";
 import { setModalErrorSnackMessage } from "../../../systemSlice";
 import { useAppDispatch } from "../../../store";
-import api from "../../../common/api";
 import SearchBox from "../Common/SearchBox";
+import {api} from "../../../api";
+import {Simulate} from "react-dom/test-utils";
+import error = Simulate.error;
+import {Role} from "../../../api/consoleApi";
 
 interface IGroupsProps {
-  selectedGroups: string[];
+  selectedRoleIds: string[];
   setSelectedGroups: any;
+  shouldCreatedByMe: boolean;
 }
 
-const GroupsSelectors = ({
-  selectedGroups,
+const RolesSelectors = ({
+  selectedRoleIds,
   setSelectedGroups,
+  shouldCreatedByMe,
 }: IGroupsProps) => {
   const dispatch = useAppDispatch();
   // Local State
-  const [records, setRecords] = useState<any[]>([]);
+  const [records, setRecords] = useState<Role[]>([]);
   const [loading, isLoading] = useState<boolean>(false);
   const [filter, setFilter] = useState<string>("");
 
   const fetchGroups = useCallback(() => {
-    api
-      .invoke("GET", `/api/v1/groups`)
-      .then((res: GroupsList) => {
-        let groups = get(res, "groups", []);
-
-        if (!groups) {
-          groups = [];
-        }
-        setRecords(groups.sort(stringSort));
-        isLoading(false);
-      })
-      .catch((err: ErrorResponseHandler) => {
-        dispatch(setModalErrorSnackMessage(err));
-        isLoading(false);
-      });
+    let filter = {};
+    if (shouldCreatedByMe) {
+      filter = {createByMe: true}
+    }
+    api.role.getMyRoleDetail(filter).then(res => {
+      setRecords(res.data)
+      isLoading(false)
+    }).catch(e => {
+      dispatch(setModalErrorSnackMessage(e))
+      isLoading(false)
+    })
   }, [dispatch]);
 
   //Effects
@@ -70,7 +71,7 @@ const GroupsSelectors = ({
     }
   }, [loading, fetchGroups]);
 
-  const selGroups = !selectedGroups ? [] : selectedGroups;
+  const selGroups = !selectedRoleIds ? [] : selectedRoleIds;
 
   const selectionChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
     const targetD = e.target;
@@ -91,46 +92,29 @@ const GroupsSelectors = ({
     return elements;
   };
 
-  const filteredRecords = records.filter((elementItem) =>
-    elementItem.includes(filter),
-  );
+  const filteredRecords = records;
 
   return (
     <Grid item xs={12} className={"inputItem"}>
       {loading && <ProgressBar />}
       {records !== null && records.length > 0 ? (
         <Fragment>
-          <Grid item xs={12} className={"inputItem"}>
-            <SearchBox
-              placeholder="Start typing to search for Groups"
-              onChange={setFilter}
-              value={filter}
-              label={"Assign Groups"}
-            />
-          </Grid>
           <DataTable
-            columns={[{ label: "Group" }]}
+            columns={[{ label: "角色" , elementKey: "name"}]}
             onSelect={selectionChanged}
             selectedItems={selGroups}
             isLoading={loading}
             records={filteredRecords}
             entityName="Groups"
-            idField=""
+            idField="id"
             customPaperHeight={"200px"}
           />
         </Fragment>
       ) : (
-        <Box
-          sx={{
-            textAlign: "center",
-            padding: "10px 0",
-          }}
-        >
-          No Groups Available
-        </Box>
+        <></>
       )}
     </Grid>
   );
 };
 
-export default GroupsSelectors;
+export default RolesSelectors;

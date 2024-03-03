@@ -123,7 +123,7 @@ export interface MakeBucketRequest {
 }
 
 export interface ApiError {
-    message?: string;
+    msg?: string;
     detailedMessage?: string;
 }
 
@@ -133,6 +133,16 @@ export interface User {
     memberOf?: string[];
     status?: string;
     hasPolicy?: boolean;
+}
+
+export interface QuickIOUser {
+    id: string;
+    username: string;
+    email: string;
+    password: string; // no display
+    create_time: number;
+    update_time: number;
+    roles: string[];
 }
 
 interface Resource {
@@ -165,7 +175,8 @@ export interface Permission {
 
 export interface ListUsersResponse {
     /** list of resulting users */
-    users?: User[];
+    users?: QuickIOUser[];
+    count?: number;
 }
 
 export type SelectedUsers = string[];
@@ -1754,7 +1765,10 @@ export class HttpClient<SecurityDataType = unknown> {
         const payloadFormatter = this.contentFormatters[type || ContentType.Json];
         const responseFormat = format || requestParams.format;
 
-        const jwt = "mock"
+        let jwt = localStorage.getItem("jwt");
+        if (!jwt) {
+            jwt = "mock"
+        }
 
         return this.customFetch(
             `${baseUrl || this.baseUrl || ""}${path}${
@@ -1843,11 +1857,13 @@ export class Api<
          * @request POST:/login
          */
         login: (body: LoginRequest, params: RequestParams = {}) =>
-            this.request<void, ApiError>({
+            this.request<{token: string}, ApiError>({
                 path: `/user/login`,
                 method: "POST",
                 body: body,
+                secure: true,
                 type: ContentType.Json,
+                format: "json",
                 ...params,
             }),
 
@@ -3255,7 +3271,7 @@ export class Api<
             params: RequestParams = {},
         ) =>
             this.request<ListUsersResponse, ApiError>({
-                path: `/users`,
+                path: `/user/list`,
                 method: "GET",
                 query: query,
                 secure: true,
@@ -3308,6 +3324,18 @@ export class Api<
     };
 
     role = {
+        grantRoles: (users: string[], roles: string[]) =>
+            this.request < Role, ApiError > ({
+            path: `/role/grant`,
+            method: "POST",
+            secure: true,
+            format: "json",
+            body: {
+                users,
+                roles
+            },
+        }),
+
         createRole: (role: Role, params: RequestParams = {}) =>
             this.request < Role, ApiError > ({
                 path: `/role`,
@@ -3338,7 +3366,18 @@ export class Api<
                 secure: true,
                 format: "json",
                 ...params,
+            }),
+
+        getMyRoleDetail: (query: any) =>
+            this.request<Role[], ApiError>({
+                path: `/role/me/detail`,
+                method: "GET",
+                query: query,
+                secure: true,
+                format: "json",
             })
+
+
     }
 
     user = {

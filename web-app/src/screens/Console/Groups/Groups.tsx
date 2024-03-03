@@ -60,6 +60,7 @@ import HelpMenu from "../HelpMenu";
 import SearchBox from "../Common/SearchBox";
 import {useSelector} from "react-redux";
 import {Role} from "../../../api/consoleApi";
+import {DOC_HELPER} from "../Users/doc";
 
 const DeleteGroup = withSuspense(React.lazy(() => import("./DeleteGroup")));
 const SetPolicy = withSuspense(
@@ -81,6 +82,7 @@ const Groups = () => {
     const navigate = useNavigate();
 
     const [loading, isLoading] = useState<boolean>(false);
+    const [filter, setFilter] = useState<string>("");
     const [records, setRecords] = useState<any[]>([]);
     const [checkedGroups, setCheckedGroups] = useState<string[]>([]);
 
@@ -165,8 +167,7 @@ const Groups = () => {
                     api.role
                         .listRoles(new Date().getTime(), 1000)
                         .then((res) => {
-                            console.log(res.data)
-                            setRecords(res.data.roles);
+                            setRecords(res.data.roles || [])
                             isLoading(false);
                         })
                         .catch((err) => {
@@ -206,50 +207,26 @@ const Groups = () => {
             <PageLayout>
                 <Grid container>
                     <Grid item xs={12} sx={actionsTray.actionsTray}>
-                        <Box
+                        <SearchBox
+                            placeholder={"搜索用户"}
+                            onChange={setFilter}
+                            value={filter}
                             sx={{
-                                display: "flex",
+                                marginRight: "auto",
+                                maxWidth: 380,
                             }}
-                        >
-                            {/*<SecureComponent*/}
-                            {/*  resource={CONSOLE_UI_RESOURCE}*/}
-                            {/*  scopes={applyPolicyPermissions}*/}
-                            {/*  matchAll*/}
-                            {/*  errorProps={{ disabled: true }}*/}
-                            {/*>*/}
-                            {/*  <TooltipWrapper*/}
-                            {/*    tooltip={*/}
-                            {/*      checkedGroups.length < 1*/}
-                            {/*        ? "Please select Groups on which you want to apply Policies"*/}
-                            {/*        : applyPolicy*/}
-                            {/*          ? "Select Policy"*/}
-                            {/*          : permissionTooltipHelper(*/}
-                            {/*              applyPolicyPermissions,*/}
-                            {/*              "apply policies to Groups",*/}
-                            {/*            )*/}
-                            {/*    }*/}
-                            {/*  >*/}
-                            {/*  </TooltipWrapper>*/}
-                            {/*</SecureComponent>*/}
-                            <SecureComponent
-                                resource={CONSOLE_UI_RESOURCE}
-                                scopes={createGroupPermissions}
-                                matchAll
-                                errorProps={{disabled: true}}
-                            >
-                                <TooltipWrapper tooltip={"创建角色"}>
-                                    <Button
-                                        id={"create-role"}
-                                        label={"创建角色"}
-                                        variant="callAction"
-                                        icon={<AddIcon/>}
-                                        onClick={() => {
-                                            navigate(`${IAM_PAGES.GROUPS_ADD}`);
-                                        }}
-                                    />
-                                </TooltipWrapper>
-                            </SecureComponent>
-                        </Box>
+                        />
+
+                        <Button
+                            id={"create-role"}
+                            label={"创建角色"}
+                            variant="callAction"
+                            icon={<AddIcon/>}
+                            onClick={() => {
+                                navigate(`${IAM_PAGES.GROUPS_ADD}`);
+                            }}
+                        />
+
                     </Grid>
                     {loading && <ProgressBar/>}
                     {!loading && (
@@ -282,37 +259,36 @@ const Groups = () => {
                                             />
                                         </SecureComponent>
                                     </Grid>
-                                    <Grid item xs={12}>
-                                        <Grid container>
-                                            <Grid item xs={8}>
-                                                <HelpBox
-                                                    title={"角色"}
-                                                    iconComponent={<UsersIcon/>}
-                                                    help={
-                                                        <Fragment>
-                                                            在QuickIO中，角色是一组权限点的集合，用于定义拥有一组资源实体的可读、可写、可管理权限的实体，与特定用户解耦。
-                                                            用户可以选择自己拥有管理权限的资源创建新的角色，并授予给其他人。
-                                                            <br/>
-                                                            <br/>
-                                                            去创建用户，{" "}
-                                                            <ActionLink
-                                                                onClick={() => {
-                                                                    navigate(`${IAM_PAGES.GROUPS_ADD}`);
-                                                                }}
-                                                            >
-                                                                Create a Role
-                                                            </ActionLink>
-                                                            .
-                                                        </Fragment>
-                                                    }
-                                                />
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
                                 </Fragment>
                             )}
                         </Fragment>
                     )}
+                    <Grid item xs={12}>
+                        <Grid container>
+                            <Grid item xs={8}>
+                                <HelpBox
+                                    title={"角色"}
+                                    iconComponent={<UsersIcon/>}
+                                    help={
+                                        <Fragment>
+                                            {DOC_HELPER.ROLE_BASIC}
+                                            <br/>
+                                            <br/>
+                                            去创建用户，{" "}
+                                            <ActionLink
+                                                onClick={() => {
+                                                    navigate(`${IAM_PAGES.GROUPS_ADD}`);
+                                                }}
+                                            >
+                                                Create a Role
+                                            </ActionLink>
+                                            .
+                                        </Fragment>
+                                    }
+                                />
+                            </Grid>
+                        </Grid>
+                    </Grid>
                 </Grid>
             </PageLayout>
         </Fragment>

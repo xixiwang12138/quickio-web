@@ -43,7 +43,7 @@ import HelpMenu from "../HelpMenu";
 import PolicySelectors from "../Policies/PolicySelectors";
 import UserSelector from "./UserSelector";
 import PasswordSelector from "./PasswordSelector";
-import GroupsSelectors from "./GroupsSelectors";
+import RolesSelectors from "./RolesSelectors";
 
 const AddUser = () => {
   const dispatch = useAppDispatch();
@@ -97,7 +97,7 @@ const AddUser = () => {
         <PageHeaderWrapper
           label={
             <BackLink
-              label={"Users"}
+              label={"用户"}
               onClick={() => navigate(IAM_PAGES.USERS)}
             />
           }
@@ -105,7 +105,7 @@ const AddUser = () => {
         />
         <PageLayout>
           <FormLayout
-            title={"Create User"}
+            title={"创建用户"}
             icon={<CreateUserIcon />}
             helpBox={<AddUserHelpBox />}
           >
@@ -118,9 +118,9 @@ const AddUser = () => {
             >
               <UserSelector />
               <PasswordSelector />
-              <PolicySelectors selectedPolicy={selectedPolicies} />
-              <GroupsSelectors
-                selectedGroups={selectedGroups}
+              <RolesSelectors
+                shouldCreatedByMe={true}
+                selectedRoleIds={selectedGroups}
                 setSelectedGroups={(elements: string[]) => {
                   dispatch(setSelectedGroups(elements));
                 }}

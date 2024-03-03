@@ -26,11 +26,11 @@ import {
 
 import { modalStyleUtils } from "../Common/FormComponents/common/styleLibrary";
 import { ErrorResponseHandler } from "../../../common/types";
-import api from "../../../common/api";
-import GroupsSelectors from "./GroupsSelectors";
+import RolesSelectors from "./RolesSelectors";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
 import { setModalErrorSnackMessage } from "../../../systemSlice";
 import { useAppDispatch } from "../../../store";
+import {api} from "../../../api";
 
 interface IAddToGroup {
   open: boolean;
@@ -53,11 +53,8 @@ const BulkAddToGroup = ({
   useEffect(() => {
     if (saving) {
       if (selectedGroups.length > 0) {
-        api
-          .invoke("PUT", "/api/v1/users-groups-bulk", {
-            groups: selectedGroups,
-            users: checkedUsers,
-          })
+
+        api.role.grantRoles(checkedUsers, selectedGroups)
           .then(() => {
             isSaving(false);
             setAccepted(true);
@@ -70,7 +67,7 @@ const BulkAddToGroup = ({
         isSaving(false);
         dispatch(
           setModalErrorSnackMessage({
-            errorMessage: "You need to select at least one group to assign",
+            errorMessage: "至少选择一个角色",
             detailedError: "",
           }),
         );
@@ -104,8 +101,8 @@ const BulkAddToGroup = ({
       }}
       title={
         accepted
-          ? "The selected users were added to the following groups."
-          : "Add Users to Group"
+          ? "已成功授予角色"
+          : "为用户授予角色"
       }
       titleIcon={<AddMembersToGroupIcon />}
     >
@@ -128,11 +125,12 @@ const BulkAddToGroup = ({
       ) : (
         <form noValidate autoComplete="off" onSubmit={setSaving}>
           <FormLayout withBorders={false} containerPadding={false}>
-            <ReadBox label={"Selected Users"} sx={{ width: "100%" }}>
+            <ReadBox label={"选择的角色"} sx={{ width: "100%" }}>
               {checkedUsers.join(", ")}
             </ReadBox>
-            <GroupsSelectors
-              selectedGroups={selectedGroups}
+            <RolesSelectors
+                shouldCreatedByMe={true}
+              selectedRoleIds={selectedGroups}
               setSelectedGroups={setSelectedGroups}
             />
           </FormLayout>

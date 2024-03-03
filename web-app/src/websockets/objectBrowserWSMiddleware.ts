@@ -129,7 +129,7 @@ export const objectBrowserWSMiddleware = (
                 dispatch(
                   setErrorSnackMessage({
                     errorMessage:
-                      errorMsg.message || basicErrorMessage.errorMessage,
+                      errorMsg.msg || basicErrorMessage.errorMessage,
                     detailedError:
                       errorMsg.detailedMessage ||
                       basicErrorMessage.detailedMessage,
@@ -148,7 +148,7 @@ export const objectBrowserWSMiddleware = (
               dispatch(
                 setErrorSnackMessage({
                   errorMessage:
-                    errorMsg.message || basicErrorMessage.errorMessage,
+                    errorMsg.msg || basicErrorMessage.errorMessage,
                   detailedError:
                     errorMsg.detailedMessage ||
                     basicErrorMessage.detailedMessage,

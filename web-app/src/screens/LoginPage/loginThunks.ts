@@ -27,6 +27,7 @@ import { api } from "api";
 import { ApiError, LoginRequest } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
 import { isDarkModeOn } from "../../utils/stylesUtils";
+import {useNavigate} from "react-router-dom";
 
 export const doLoginAsync = createAsyncThunk(
   "login/doLoginAsync",
@@ -57,7 +58,8 @@ export const doLoginAsync = createAsyncThunk(
         // We set the state in redux
         dispatch(userLogged(true));
         localStorage.setItem("userLoggedIn", accessKey);
-        dispatch(setNavigateTo(getTargetPath()));
+        localStorage.setItem("jwt", res.data.token);
+
         dispatch(setDarkMode(!!darkModeEnabled));
       })
       .catch(async (res) => {
