@@ -231,16 +231,6 @@ const BucketDetails = () => {
               ]}
               resource={bucketName}
             >
-              {/*<span style={{ fontSize: 15 }}>Access: </span>*/}
-              {/*<span*/}
-              {/*  style={{*/}
-              {/*    fontWeight: 600,*/}
-              {/*    fontSize: 15,*/}
-              {/*    textTransform: "capitalize",*/}
-              {/*  }}*/}
-              {/*>*/}
-              {/*  {bucketInfo?.access?.toLowerCase()}*/}
-              {/*</span>*/}
             </SecureComponent>
           }
           actions={
@@ -275,14 +265,6 @@ const BucketDetails = () => {
                   />
                 </TooltipWrapper>
               </SecureComponent>
-              {/*<Button*/}
-              {/*  id={"refresh-bucket-info"}*/}
-              {/*  onClick={() => {*/}
-              {/*    dispatch(setBucketDetailsLoad(true));*/}
-              {/*  }}*/}
-              {/*  label={"Refresh"}*/}
-              {/*  icon={<RefreshIcon />}*/}
-              {/*/>*/}
             </Fragment>
           }
           sx={{ marginBottom: 15 }}
@@ -302,23 +284,10 @@ const BucketDetails = () => {
                   to: getRoutePath("summary"),
                 },
               },
-              {
-                tabConfig: {
-                  label: "Access",
-                  id: "access",
-                  disabled: !hasPermission(bucketName, [
-                    IAM_SCOPES.ADMIN_GET_POLICY,
-                    IAM_SCOPES.ADMIN_LIST_USER_POLICIES,
-                    IAM_SCOPES.ADMIN_LIST_USERS,
-                  ]),
-                  to: getRoutePath("access"),
-                },
-              },
             ]}
             routes={
               <Routes>
                 <Route path="summary" element={<BucketSummaryPanel />} />
-                <Route path="access" element={<AccessDetailsPanel />} />
                 <Route
                   path="*"
                   element={

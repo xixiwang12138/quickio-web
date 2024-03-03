@@ -33,27 +33,19 @@ import { encodeURLString } from "../../../../common/utils";
 import { setErrorSnackMessage, setHelpName } from "../../../../systemSlice";
 import { selBucketDetailsLoading } from "./bucketDetailsSlice";
 import { useAppDispatch } from "../../../../store";
-import { Policy } from "../../../../api/consoleApi";
+import {Policy, QuickIOUser, User} from "../../../../api/consoleApi";
 
 const AccessDetails = () => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const params = useParams();
 
   const loadingBucket = useSelector(selBucketDetailsLoading);
 
   const [curTab, setCurTab] = useState<string>("simple-tab-0");
-  const [loadingPolicies, setLoadingPolicies] = useState<boolean>(true);
-  const [bucketPolicy, setBucketPolicy] = useState<Policy[] | undefined>([]);
   const [loadingUsers, setLoadingUsers] = useState<boolean>(true);
-  const [bucketUsers, setBucketUsers] = useState<string[]>([]);
+  const [bucketUsers, setBucketUsers] = useState<QuickIOUser[]>([]);
 
   const bucketName = params.bucketName || "";
-
-  const displayPoliciesList = hasPermission(bucketName, [
-    IAM_SCOPES.ADMIN_LIST_USER_POLICIES,
-  ]);
-
   const displayUsersList = hasPermission(
     bucketName,
     [
@@ -67,36 +59,17 @@ const AccessDetails = () => {
   const viewUser = hasPermission(CONSOLE_UI_RESOURCE, [
     IAM_SCOPES.ADMIN_GET_USER,
   ]);
-  const viewPolicy = hasPermission(CONSOLE_UI_RESOURCE, [
-    IAM_SCOPES.ADMIN_GET_POLICY,
-    IAM_SCOPES.ADMIN_LIST_USERS,
-    IAM_SCOPES.ADMIN_LIST_GROUPS,
-  ]);
-
   useEffect(() => {
     if (loadingBucket) {
       setLoadingUsers(true);
-      setLoadingPolicies(true);
     }
-  }, [loadingBucket, setLoadingUsers, setLoadingPolicies]);
-
-  const PolicyActions = [
-    {
-      type: "view",
-      disableButtonFunction: () => !viewPolicy,
-      onClick: (policy: any) => {
-        navigate(`${IAM_PAGES.POLICIES}/${encodeURLString(policy.name)}`);
-      },
-    },
-  ];
+  }, [loadingBucket, setLoadingUsers]);
 
   const userTableActions = [
     {
       type: "view",
       disableButtonFunction: () => !viewUser,
-      onClick: (user: any) => {
-        navigate(`${IAM_PAGES.USERS}/${encodeURLString(user)}`);
-      },
+      onClick: (user: any) => {},
     },
   ];
 
@@ -104,7 +77,10 @@ const AccessDetails = () => {
     if (loadingUsers) {
       if (displayUsersList) {
         api.bucketUsers
-          .listUsersWithAccessToBucket(bucketName)
+          .listUsersWithAccessToBucket(bucketName, {
+            limit: 1000,
+            offset: new Date().getTime(),
+          })
           .then((res) => {
             setBucketUsers(res.data);
             setLoadingUsers(false);
@@ -124,53 +100,8 @@ const AccessDetails = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (loadingPolicies) {
-      if (displayPoliciesList) {
-        api.bucketPolicy
-          .listPoliciesWithBucket(bucketName)
-          .then((res) => {
-            setBucketPolicy(res.data.policies);
-            setLoadingPolicies(false);
-          })
-          .catch((err) => {
-            dispatch(setErrorSnackMessage(errorToHandler(err)));
-            setLoadingPolicies(false);
-          });
-      } else {
-        setLoadingPolicies(false);
-      }
-    }
-  }, [loadingPolicies, dispatch, bucketName, displayPoliciesList]);
-
   return (
     <Fragment>
-      <SectionTitle separator>
-        <HelpTip
-          content={
-            <Fragment>
-              Understand which{" "}
-              <a
-                target="blank"
-                href="https://min.io/docs/minio/linux/administration/identity-access-management/policy-based-access-control.html#"
-              >
-                Policies
-              </a>{" "}
-              and{" "}
-              <a
-                target="blank"
-                href="https://min.io/docs/minio/linux/administration/identity-access-management/minio-user-management.html"
-              >
-                Users
-              </a>{" "}
-              are authorized to access this Bucket.
-            </Fragment>
-          }
-          placement="right"
-        >
-          Access Audit
-        </HelpTip>
-      </SectionTitle>
       <Tabs
         currentTabOrPath={curTab}
         onTabClick={(newValue: string) => {
@@ -179,50 +110,21 @@ const AccessDetails = () => {
         horizontal
         options={[
           {
-            tabConfig: { label: "Policies", id: "simple-tab-0" },
-            content: (
-              <SecureComponent
-                scopes={[IAM_SCOPES.ADMIN_LIST_USER_POLICIES]}
-                resource={bucketName}
-                errorProps={{ disabled: true }}
-              >
-                {bucketPolicy && (
-                  <DataTable
-                    noBackground={true}
-                    itemActions={PolicyActions}
-                    columns={[{ label: "Name", elementKey: "name" }]}
-                    isLoading={loadingPolicies}
-                    records={bucketPolicy}
-                    entityName="Policies"
-                    idField="name"
-                  />
-                )}
-              </SecureComponent>
-            ),
-          },
-          {
             tabConfig: { label: "Users", id: "simple-tab-1" },
             content: (
-              <SecureComponent
-                scopes={[
-                  IAM_SCOPES.ADMIN_GET_POLICY,
-                  IAM_SCOPES.ADMIN_LIST_USERS,
-                  IAM_SCOPES.ADMIN_LIST_GROUPS,
-                ]}
-                resource={bucketName}
-                matchAll
-                errorProps={{ disabled: true }}
-              >
                 <DataTable
-                  noBackground={true}
-                  itemActions={userTableActions}
-                  columns={[{ label: "User", elementKey: "accessKey" }]}
-                  isLoading={loadingUsers}
-                  records={bucketUsers}
-                  entityName="Users"
-                  idField="accessKey"
+                    noBackground={true}
+                    itemActions={userTableActions}
+                    columns={[
+                      {label: "用户名", elementKey: "username"},
+                      {label: "邮箱", elementKey: "email"},
+                      {label: "创建时间", elementKey: "create_time_display"},
+                    ]}
+                    isLoading={loadingUsers}
+                    records={bucketUsers}
+                    entityName="Users"
+                    idField="username"
                 />
-              </SecureComponent>
             ),
           },
         ]}

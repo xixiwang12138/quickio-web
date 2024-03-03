@@ -87,8 +87,8 @@ const RolesSelectors = ({
       // User has unchecked this field, we need to remove it from the list
       elements = elements.filter((element) => element !== value);
     }
+    console.log(elements)
     setSelectedGroups(elements);
-
     return elements;
   };
 

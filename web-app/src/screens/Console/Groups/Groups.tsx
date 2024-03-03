@@ -202,13 +202,13 @@ const Groups = () => {
 
     return (
         <Fragment>
-            <PageHeaderWrapper label={"角色"} actions={<HelpMenu/>}/>
+            <PageHeaderWrapper label={"Roles"} actions={<HelpMenu/>}/>
 
             <PageLayout>
                 <Grid container>
                     <Grid item xs={12} sx={actionsTray.actionsTray}>
                         <SearchBox
-                            placeholder={"搜索用户"}
+                            placeholder={"Search Role"}
                             onChange={setFilter}
                             value={filter}
                             sx={{
@@ -219,7 +219,7 @@ const Groups = () => {
 
                         <Button
                             id={"create-role"}
-                            label={"创建角色"}
+                            label={"Create Role"}
                             variant="callAction"
                             icon={<AddIcon/>}
                             onClick={() => {

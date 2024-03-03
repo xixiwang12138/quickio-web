@@ -3939,8 +3939,8 @@ export class Api<
             },
             params: RequestParams = {},
         ) =>
-            this.request<SelectedUsers, ApiError>({
-                path: `/bucket-users/${bucket}`,
+            this.request<QuickIOUser[], ApiError>({
+                path: `/bucket/${bucket}/users`,
                 method: "GET",
                 query: query,
                 secure: true,

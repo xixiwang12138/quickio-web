@@ -40,25 +40,21 @@ import HelpMenu from "../HelpMenu";
 import {setQuota} from "../Buckets/ListBuckets/AddBucket/addBucketsSlice";
 import {Permission} from "../../../api/consoleApi";
 import {useSelector} from "react-redux";
+import {analyze} from "ts-prune/lib/analyzer";
 
 
-const SelectRecord = (
-    display: any,
-    selectedRecords: any,
-    select: any,
-    title: string,
-) => {
+const SelectRecord = (props: any) => {
     return <FormLayout withBorders={false} containerPadding={false}>
         <Grid item xs={12} className={"inputItem"}>
             <Box>
-                {display?.length > 0 ? (
+                {props.display?.length > 0 ? (
                     <Fragment>
                         <DataTable
-                            columns={[{label: `${title}`, elementKey: "name"}]}
-                            onSelect={select}
-                            selectedItems={selectedRecords}
+                            columns={[{label: `${props.title}`, elementKey: "name"}]}
+                            onSelect={props.select}
+                            selectedItems={props.selectedRecords}
                             isLoading={false}
-                            records={display}
+                            records={props.display}
                             idField="name"
                             customPaperHeight={"200px"}
                         />
@@ -80,8 +76,8 @@ const AddGroupScreen = () => {
     const [loadUserPerm, setLoadUserPerm] = useState<boolean>(true);
 
 
-    const [read, setRead] = useState<string[]>([]);
-    const [write, setWrite] = useState<string[]>([]);
+    const [read, setRead] = useState<[]>([]);
+    const [write, setWrite] = useState<[]>([]);
     const [manage, setManage] = useState<string[]>([]);
 
 
@@ -168,12 +164,14 @@ const AddGroupScreen = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    console.log(perm);
+
     return (
         <Fragment>
             <PageHeaderWrapper
                 label={
                     <BackLink
-                        label={"角色"}
+                        label={"Roles"}
                         onClick={() => navigate(IAM_PAGES.GROUPS)}
                     />
                 }
@@ -181,7 +179,7 @@ const AddGroupScreen = () => {
             />
             <PageLayout>
                 <FormLayout
-                    title={"创建角色"}
+                    title={"Create Role"}
                     icon={<CreateGroupIcon/>}
                     helpBox={<AddGroupHelpBox/>}
                 >
@@ -196,43 +194,46 @@ const AddGroupScreen = () => {
                                 setGroupName(e.target.value);
                             }}
                         />
-                        {(perm?.readable && <SelectRecord
+                        {perm?.readable && (<SelectRecord
                             selectedRecords={read}
                             select={setRead}
-                            display={perm?.readable.map(value => value.resource_index)}
+                            display={perm?.readable.map(value => value.resource_index) as []}
                             title={"授予仅读权限的bucket"}
                         />)}
 
-                        {(perm?.writable && <SelectRecord
-                            select={write}
-                            selectedRecords={setWrite}
-                            display={perm?.writable.map(value => value.resource_index)}
+                        {perm?.writable && (<SelectRecord
+                            selectedRecords={write}
+                            select={setWrite} // TODO 设置选中函数回调函数
+                            display={perm?.writable.map(value => value.resource_index) as []}
                             title={"授予读写权限的bucket"}
                         />)}
 
-                        {(perm.manageable && <SelectRecord
-                            select={manage}
-                            selectedRecords={setManage}
+                        {perm?.manageable && (<SelectRecord
+                            select={setManage}
+                            selectedRecords={manage}
                             display={perm?.manageable.map(value => value.resource_index)}
                             title={"授予管理权限的bucket"}
                         />)}
 
+                        <Grid xs={12}>
+                            {
+                                perm?.create_user ?
+                                    <Switch
+                                        value="allow_create_user"
+                                        id="allow_create_user"
+                                        name="allow_create_user"
+                                        checked={allow_create_user}
+                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                            setAllowCreateUser(event.target.checked)
+                                        }}
+                                        label={"允许该角色创建新的用户"}
+                                        disabled={!perm?.create_user}
+                                        helpTipPlacement="right"
+                                    /> : <></>
+                            }
+                        </Grid>
 
-                        {
-                            perm?.create_user ?
-                                <Switch
-                                    value="allow_create_user"
-                                    id="allow_create_user"
-                                    name="allow_create_user"
-                                    checked={allow_create_user}
-                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                        setAllowCreateUser(event.target.checked)
-                                    }}
-                                    label={"允许该角色创建新的用户"}
-                                    disabled={!perm?.create_user}
-                                    helpTipPlacement="right"
-                                /> : <></>
-                        }
+
 
                         <Grid item xs={12} sx={modalStyleUtils.modalButtonBar}>
                             <Button

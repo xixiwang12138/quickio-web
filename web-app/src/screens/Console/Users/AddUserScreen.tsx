@@ -97,7 +97,7 @@ const AddUser = () => {
         <PageHeaderWrapper
           label={
             <BackLink
-              label={"用户"}
+              label={"User"}
               onClick={() => navigate(IAM_PAGES.USERS)}
             />
           }
@@ -105,7 +105,7 @@ const AddUser = () => {
         />
         <PageLayout>
           <FormLayout
-            title={"创建用户"}
+            title={"Create User"}
             icon={<CreateUserIcon />}
             helpBox={<AddUserHelpBox />}
           >

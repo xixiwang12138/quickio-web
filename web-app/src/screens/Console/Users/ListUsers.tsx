@@ -203,13 +203,13 @@ const ListUsers = () => {
                     }}
                 />
             )}
-            <PageHeaderWrapper label={"用户"} actions={<HelpMenu/>}/>
+            <PageHeaderWrapper label={"Users"} actions={<HelpMenu/>}/>
 
             <PageLayout>
                 <Grid container>
                     <Grid item xs={12} sx={actionsTray.actionsTray}>
                         <SearchBox
-                            placeholder={"搜索用户"}
+                            placeholder={"Search Users"}
                             onChange={setFilter}
                             value={filter}
                             sx={{
@@ -219,7 +219,7 @@ const ListUsers = () => {
                         />
                         <Button
                             id={"add-to-group"}
-                            label={"授予角色"}
+                            label={"Grant Role"}
                             icon={<GroupsIcon/>}
                             disabled={checkedUsers.length <= 0}
                             onClick={() => {
@@ -231,7 +231,7 @@ const ListUsers = () => {
                         />
                         {(perm.create_user && <Button
                             id={"create-user"}
-                            label={"创建用户"}
+                            label={"Create User"}
                             icon={<AddIcon/>}
                             onClick={() => {
                                 navigate(`${IAM_PAGES.USER_ADD}`);
@@ -281,7 +281,7 @@ const ListUsers = () => {
                                 <Grid container>
                                     <Grid item xs={8}>
                                         <HelpBox
-                                            title={"Users"}
+                                            title={"用户"}
                                             iconComponent={<UsersIcon/>}
                                             help={
                                                 <Fragment>
