@@ -158,13 +158,13 @@ export const validRoutes = (
           icon: <UsersMenuIcon />,
           forceDisplay: true
         },
-        // {
-        //   id: "groups",
-        //   path: IAM_PAGES.GROUPS,
-        //   name: "Groups",
-        //   icon: <GroupsMenuIcon />,
-        //   fsHidden: ldapIsEnabled,
-        // },
+        {
+          id: "groups",
+          path: IAM_PAGES.GROUPS,
+          name: "Roles",
+          icon: <GroupsMenuIcon />,
+          fsHidden: ldapIsEnabled,
+        },
         // {
         //   name: "OpenID",
         //   id: "openID",

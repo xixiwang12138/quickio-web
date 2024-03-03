@@ -14,385 +14,309 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Fragment, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, {Fragment, useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
 import {
-  AddIcon,
-  Button,
-  DeleteIcon,
-  GroupsIcon,
-  HelpBox,
-  IAMPoliciesIcon,
-  PageLayout,
-  UsersIcon,
-  DataTable,
-  Grid,
-  Box,
-  ProgressBar,
-  ActionLink,
+    AddIcon,
+    Button,
+    DeleteIcon,
+    GroupsIcon,
+    HelpBox,
+    IAMPoliciesIcon,
+    PageLayout,
+    UsersIcon,
+    DataTable,
+    Grid,
+    Box,
+    ProgressBar,
+    ActionLink,
 } from "mds";
 
-import { api } from "api";
-import { stringSort } from "../../../utils/sortFunctions";
-import { actionsTray } from "../Common/FormComponents/common/styleLibrary";
+import {api} from "api";
+import {stringSort} from "../../../utils/sortFunctions";
+import {actionsTray} from "../Common/FormComponents/common/styleLibrary";
 import {
-  applyPolicyPermissions,
-  CONSOLE_UI_RESOURCE,
-  createGroupPermissions,
-  deleteGroupPermissions,
-  displayGroupsPermissions,
-  getGroupPermissions,
-  IAM_PAGES,
-  permissionTooltipHelper,
+    applyPolicyPermissions,
+    CONSOLE_UI_RESOURCE,
+    createGroupPermissions,
+    deleteGroupPermissions,
+    displayGroupsPermissions,
+    getGroupPermissions,
+    IAM_PAGES,
+    permissionTooltipHelper,
 } from "../../../common/SecureComponent/permissions";
 import {
-  hasPermission,
-  SecureComponent,
+    hasPermission,
+    SecureComponent,
 } from "../../../common/SecureComponent";
-import { errorToHandler } from "../../../api/errors";
+import {errorToHandler} from "../../../api/errors";
 import withSuspense from "../Common/Components/withSuspense";
-import { encodeURLString } from "../../../common/utils";
-import { setErrorSnackMessage, setHelpName } from "../../../systemSlice";
-import { useAppDispatch } from "../../../store";
+import {encodeURLString} from "../../../common/utils";
+import {setErrorSnackMessage, setHelpName} from "../../../systemSlice";
+import {AppState, useAppDispatch} from "../../../store";
 import TooltipWrapper from "../Common/TooltipWrapper/TooltipWrapper";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
 import SearchBox from "../Common/SearchBox";
+import {useSelector} from "react-redux";
+import {Role} from "../../../api/consoleApi";
 
 const DeleteGroup = withSuspense(React.lazy(() => import("./DeleteGroup")));
 const SetPolicy = withSuspense(
-  React.lazy(() => import("../Policies/SetPolicy")),
+    React.lazy(() => import("../Policies/SetPolicy")),
 );
 
+interface UserRoleRecord {
+    name: string; //角色名称
+
+    own: string; // 是否拥有
+
+    readCount: string; // 可查看
+    writeCount: string;
+    manageCount: string;
+}
+
 const Groups = () => {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
-  const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
-  const [loading, isLoading] = useState<boolean>(false);
-  const [records, setRecords] = useState<any[]>([]);
-  const [filter, setFilter] = useState<string>("");
-  const [policyOpen, setPolicyOpen] = useState<boolean>(false);
-  const [checkedGroups, setCheckedGroups] = useState<string[]>([]);
+    const [loading, isLoading] = useState<boolean>(false);
+    const [records, setRecords] = useState<any[]>([]);
+    const [checkedGroups, setCheckedGroups] = useState<string[]>([]);
 
-  useEffect(() => {
-    isLoading(true);
-  }, []);
-
-  useEffect(() => {
-    isLoading(true);
-  }, []);
-
-  useEffect(() => {
-    dispatch(setHelpName("groups"));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const displayGroups = hasPermission(
-    CONSOLE_UI_RESOURCE,
-    displayGroupsPermissions,
-  );
-
-  const deleteGroup = hasPermission(
-    CONSOLE_UI_RESOURCE,
-    deleteGroupPermissions,
-  );
-
-  const getGroup = hasPermission(CONSOLE_UI_RESOURCE, getGroupPermissions);
-
-  const applyPolicy = hasPermission(
-    CONSOLE_UI_RESOURCE,
-    applyPolicyPermissions,
-    true,
-  );
-
-  const selectionChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { target: { value = "", checked = false } = {} } = e;
-
-    let elements: string[] = [...checkedGroups]; // We clone the checkedUsers array
-
-    if (checked) {
-      // If the user has checked this field we need to push this to checkedUsersList
-      elements.push(value);
-    } else {
-      // User has unchecked this field, we need to remove it from the list
-      elements = elements.filter((element) => element !== value);
+    const [userRoles, setUserRoles] = useState<string[]>([]);
+    const transRole = (records: Role[]) => {
+        return records.map(v => {
+            return {
+                name: v.name,
+                own: !v ? "否" : (userRoles.includes(v.id as string) ? "是" : "否"),
+                readCount: `${v.read_access.length}`,
+                writeCount: `${v.write_access.length}`,
+                manageCount: `${v.manage_access.length}`
+            }
+        })
     }
 
-    setCheckedGroups(elements);
-
-    return elements;
-  };
-
-  useEffect(() => {
-    if (loading) {
-      if (displayGroups) {
-        const fetchRecords = () => {
-          api.groups
-            .listGroups()
-            .then((res) => {
-              let resGroups: string[] = [];
-              if (res.data.groups) {
-                resGroups = res.data.groups.sort(stringSort);
-              }
-              setRecords(resGroups);
-              isLoading(false);
+    useEffect(() => {
+        const fetchUSerRole = () => {
+            api.role.getMyRoles().then(res => {
+                setUserRoles(res.data)
+            }).catch(e => {
+                console.log(e)
             })
-            .catch((err) => {
-              dispatch(setErrorSnackMessage(errorToHandler(err.error)));
-              isLoading(false);
-            });
-        };
-        fetchRecords();
-      } else {
-        isLoading(false);
-      }
-    }
-  }, [loading, dispatch, displayGroups]);
+        }
 
-  const closeDeleteModalAndRefresh = (refresh: boolean) => {
-    setDeleteOpen(false);
-    setCheckedGroups([]);
-    if (refresh) {
-      isLoading(true);
-    }
-  };
+        fetchUSerRole()
+    }, [])
 
-  const filteredRecords = records.filter((elementItem) =>
-    elementItem.includes(filter),
-  );
+    useEffect(() => {
+        isLoading(true);
+    }, []);
 
-  const viewAction = (group: any) => {
-    navigate(`${IAM_PAGES.GROUPS}/${encodeURLString(group)}`);
-  };
+    useEffect(() => {
+        isLoading(true);
+    }, []);
 
-  const tableActions = [
-    {
-      type: "view",
-      onClick: viewAction,
-      disableButtonFunction: () => !getGroup,
-    },
-    {
-      type: "edit",
-      onClick: viewAction,
-      disableButtonFunction: () => !getGroup,
-    },
-  ];
+    useEffect(() => {
+        dispatch(setHelpName("groups"));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-  return (
-    <Fragment>
-      {deleteOpen && (
-        <DeleteGroup
-          deleteOpen={deleteOpen}
-          selectedGroups={checkedGroups}
-          closeDeleteModalAndRefresh={closeDeleteModalAndRefresh}
-        />
-      )}
-      {policyOpen && (
-        <SetPolicy
-          open={policyOpen}
-          selectedGroups={checkedGroups}
-          selectedUser={null}
-          closeModalAndRefresh={() => {
-            setPolicyOpen(false);
-          }}
-        />
-      )}
-      <PageHeaderWrapper label={"Groups"} actions={<HelpMenu />} />
+    const displayGroups = hasPermission(
+        CONSOLE_UI_RESOURCE,
+        displayGroupsPermissions,
+    );
 
-      <PageLayout>
-        <Grid container>
-          <Grid item xs={12} sx={actionsTray.actionsTray}>
-            <SecureComponent
-              resource={CONSOLE_UI_RESOURCE}
-              scopes={displayGroupsPermissions}
-              errorProps={{ disabled: true }}
-            >
-              <SearchBox
-                placeholder={"Search Groups"}
-                onChange={setFilter}
-                value={filter}
-                sx={{ maxWidth: 380 }}
-              />
-            </SecureComponent>
-            <Box
-              sx={{
-                display: "flex",
-              }}
-            >
-              <SecureComponent
-                resource={CONSOLE_UI_RESOURCE}
-                scopes={applyPolicyPermissions}
-                matchAll
-                errorProps={{ disabled: true }}
-              >
-                <TooltipWrapper
-                  tooltip={
-                    checkedGroups.length < 1
-                      ? "Please select Groups on which you want to apply Policies"
-                      : applyPolicy
-                        ? "Select Policy"
-                        : permissionTooltipHelper(
-                            applyPolicyPermissions,
-                            "apply policies to Groups",
-                          )
-                  }
-                >
-                  <Button
-                    id={"assign-policy"}
-                    onClick={() => {
-                      setPolicyOpen(true);
-                    }}
-                    label={"Assign Policy"}
-                    icon={<IAMPoliciesIcon />}
-                    disabled={checkedGroups.length < 1 || !applyPolicy}
-                    variant={"regular"}
-                  />
-                </TooltipWrapper>
-              </SecureComponent>
-              <SecureComponent
-                resource={CONSOLE_UI_RESOURCE}
-                scopes={deleteGroupPermissions}
-                matchAll
-                errorProps={{ disabled: true }}
-              >
-                <TooltipWrapper
-                  tooltip={
-                    checkedGroups.length === 0
-                      ? "Select Groups to delete"
-                      : getGroup
-                        ? "Delete Selected"
-                        : permissionTooltipHelper(
-                            getGroupPermissions,
-                            "delete Groups",
-                          )
-                  }
-                >
-                  <Button
-                    id="delete-selected-groups"
-                    onClick={() => {
-                      setDeleteOpen(true);
-                    }}
-                    label={"Delete Selected"}
-                    icon={<DeleteIcon />}
-                    variant="secondary"
-                    disabled={checkedGroups.length === 0 || !getGroup}
-                  />
-                </TooltipWrapper>
-              </SecureComponent>
-              <SecureComponent
-                resource={CONSOLE_UI_RESOURCE}
-                scopes={createGroupPermissions}
-                matchAll
-                errorProps={{ disabled: true }}
-              >
-                <TooltipWrapper tooltip={"Create Group"}>
-                  <Button
-                    id={"create-group"}
-                    label={"Create Group"}
-                    variant="callAction"
-                    icon={<AddIcon />}
-                    onClick={() => {
-                      navigate(`${IAM_PAGES.GROUPS_ADD}`);
-                    }}
-                  />
-                </TooltipWrapper>
-              </SecureComponent>
-            </Box>
-          </Grid>
-          {loading && <ProgressBar />}
-          {!loading && (
-            <Fragment>
-              {records.length > 0 && (
-                <Fragment>
-                  <Grid item xs={12} sx={{ marginBottom: 15 }}>
-                    <SecureComponent
-                      resource={CONSOLE_UI_RESOURCE}
-                      scopes={displayGroupsPermissions}
-                      errorProps={{ disabled: true }}
-                    >
-                      <DataTable
-                        itemActions={tableActions}
-                        columns={[{ label: "Name" }]}
-                        isLoading={loading}
-                        selectedItems={checkedGroups}
-                        onSelect={
-                          deleteGroup || getGroup ? selectionChanged : undefined
-                        }
-                        records={filteredRecords}
-                        entityName="Groups"
-                        idField=""
-                      />
-                    </SecureComponent>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <HelpBox
-                      title={"Groups"}
-                      iconComponent={<GroupsIcon />}
-                      help={
-                        <Fragment>
-                          A group can have one attached IAM policy, where all
-                          users with membership in that group inherit that
-                          policy. Groups support more simplified management of
-                          user permissions on the MinIO Tenant.
-                          <br />
-                          <br />
-                          You can learn more at our{" "}
-                          <a
-                            href="https://min.io/docs/minio/linux/administration/identity-access-management/minio-group-management.html?ref=con"
-                            target="_blank"
-                            rel="noopener"
-                          >
-                            documentation
-                          </a>
-                          .
-                        </Fragment>
-                      }
-                    />
-                  </Grid>
-                </Fragment>
-              )}
-              {records.length === 0 && (
+    const deleteGroup = hasPermission(
+        CONSOLE_UI_RESOURCE,
+        deleteGroupPermissions,
+    );
+
+    const getGroup = hasPermission(CONSOLE_UI_RESOURCE, getGroupPermissions);
+
+    const applyPolicy = hasPermission(
+        CONSOLE_UI_RESOURCE,
+        applyPolicyPermissions,
+        true,
+    );
+
+    const selectionChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const {target: {value = "", checked = false} = {}} = e;
+
+        let elements: string[] = [...checkedGroups]; // We clone the checkedUsers array
+
+        if (checked) {
+            // If the user has checked this field we need to push this to checkedUsersList
+            elements.push(value);
+        } else {
+            // User has unchecked this field, we need to remove it from the list
+            elements = elements.filter((element) => element !== value);
+        }
+
+        setCheckedGroups(elements);
+
+        return elements;
+    };
+
+    useEffect(() => {
+        if (loading) {
+            if (displayGroups) {
+                const fetchRecords = () => {
+                    api.role
+                        .listRoles(new Date().getTime(), 1000)
+                        .then((res) => {
+                            console.log(res.data)
+                            setRecords(res.data.roles);
+                            isLoading(false);
+                        })
+                        .catch((err) => {
+                            dispatch(setErrorSnackMessage(errorToHandler(err.error)));
+                            isLoading(false);
+                        });
+                };
+                fetchRecords();
+            } else {
+                isLoading(false);
+            }
+        }
+    }, [loading, dispatch, displayGroups]);
+    const filteredRecords = transRole(records);
+
+    const viewAction = (group: any) => {
+        navigate(`${IAM_PAGES.GROUPS}/${encodeURLString(group)}`);
+    };
+
+    const tableActions = [
+        {
+            type: "view",
+            onClick: viewAction,
+            disableButtonFunction: false,
+        },
+        {
+            type: "preview",
+            onClick: () => {
+            },
+        }
+    ];
+
+    return (
+        <Fragment>
+            <PageHeaderWrapper label={"角色"} actions={<HelpMenu/>}/>
+
+            <PageLayout>
                 <Grid container>
-                  <Grid item xs={8}>
-                    <HelpBox
-                      title={"Groups"}
-                      iconComponent={<UsersIcon />}
-                      help={
-                        <Fragment>
-                          A group can have one attached IAM policy, where all
-                          users with membership in that group inherit that
-                          policy. Groups support more simplified management of
-                          user permissions on the MinIO Tenant.
-                          <SecureComponent
-                            resource={CONSOLE_UI_RESOURCE}
-                            scopes={createGroupPermissions}
-                            matchAll
-                          >
-                            <br />
-                            <br />
-                            To get started,{" "}
-                            <ActionLink
-                              onClick={() => {
-                                navigate(`${IAM_PAGES.GROUPS_ADD}`);
-                              }}
+                    <Grid item xs={12} sx={actionsTray.actionsTray}>
+                        <Box
+                            sx={{
+                                display: "flex",
+                            }}
+                        >
+                            {/*<SecureComponent*/}
+                            {/*  resource={CONSOLE_UI_RESOURCE}*/}
+                            {/*  scopes={applyPolicyPermissions}*/}
+                            {/*  matchAll*/}
+                            {/*  errorProps={{ disabled: true }}*/}
+                            {/*>*/}
+                            {/*  <TooltipWrapper*/}
+                            {/*    tooltip={*/}
+                            {/*      checkedGroups.length < 1*/}
+                            {/*        ? "Please select Groups on which you want to apply Policies"*/}
+                            {/*        : applyPolicy*/}
+                            {/*          ? "Select Policy"*/}
+                            {/*          : permissionTooltipHelper(*/}
+                            {/*              applyPolicyPermissions,*/}
+                            {/*              "apply policies to Groups",*/}
+                            {/*            )*/}
+                            {/*    }*/}
+                            {/*  >*/}
+                            {/*  </TooltipWrapper>*/}
+                            {/*</SecureComponent>*/}
+                            <SecureComponent
+                                resource={CONSOLE_UI_RESOURCE}
+                                scopes={createGroupPermissions}
+                                matchAll
+                                errorProps={{disabled: true}}
                             >
-                              Create a Group
-                            </ActionLink>
-                            .
-                          </SecureComponent>
+                                <TooltipWrapper tooltip={"创建角色"}>
+                                    <Button
+                                        id={"create-role"}
+                                        label={"创建角色"}
+                                        variant="callAction"
+                                        icon={<AddIcon/>}
+                                        onClick={() => {
+                                            navigate(`${IAM_PAGES.GROUPS_ADD}`);
+                                        }}
+                                    />
+                                </TooltipWrapper>
+                            </SecureComponent>
+                        </Box>
+                    </Grid>
+                    {loading && <ProgressBar/>}
+                    {!loading && (
+                        <Fragment>
+                            {records.length > 0 && (
+                                <Fragment>
+                                    <Grid item xs={12} sx={{marginBottom: 15}}>
+                                        <SecureComponent
+                                            resource={CONSOLE_UI_RESOURCE}
+                                            scopes={displayGroupsPermissions}
+                                            errorProps={{disabled: true}}
+                                        >
+                                            <DataTable
+                                                itemActions={tableActions}
+                                                columns={[
+                                                    {label: "角色名称", elementKey: "name"},
+                                                    {label: "可读资源数量", elementKey: "readCount"},
+                                                    {label: "可写资源数量", elementKey: "writeCount"},
+                                                    {label: "可管理资源数量", elementKey: "manageCount"},
+                                                    {label: "是否已拥有", elementKey: "own"},
+                                                ]}
+                                                isLoading={loading}
+                                                selectedItems={checkedGroups}
+                                                // onSelect={
+                                                //     deleteGroup || getGroup ? selectionChanged : undefined
+                                                // }
+                                                records={filteredRecords}
+                                                entityName="Groups"
+                                                idField=""
+                                            />
+                                        </SecureComponent>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Grid container>
+                                            <Grid item xs={8}>
+                                                <HelpBox
+                                                    title={"角色"}
+                                                    iconComponent={<UsersIcon/>}
+                                                    help={
+                                                        <Fragment>
+                                                            在QuickIO中，角色是一组权限点的集合，用于定义拥有一组资源实体的可读、可写、可管理权限的实体，与特定用户解耦。
+                                                            用户可以选择自己拥有管理权限的资源创建新的角色，并授予给其他人。
+                                                            <br/>
+                                                            <br/>
+                                                            去创建用户，{" "}
+                                                            <ActionLink
+                                                                onClick={() => {
+                                                                    navigate(`${IAM_PAGES.GROUPS_ADD}`);
+                                                                }}
+                                                            >
+                                                                Create a Role
+                                                            </ActionLink>
+                                                            .
+                                                        </Fragment>
+                                                    }
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Fragment>
+                            )}
                         </Fragment>
-                      }
-                    />
-                  </Grid>
+                    )}
                 </Grid>
-              )}
-            </Fragment>
-          )}
-        </Grid>
-      </PageLayout>
-    </Fragment>
-  );
+            </PageLayout>
+        </Fragment>
+    );
 };
 
 export default Groups;

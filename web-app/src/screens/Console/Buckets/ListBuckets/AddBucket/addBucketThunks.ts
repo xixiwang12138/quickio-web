@@ -39,7 +39,7 @@ export const addBucketAsync = createAsyncThunk(
 
         let request: MakeBucketRequest = {
             name: bucketName,
-            permission: permission2Type(aclType),
+            permission: aclType,
         };
 
         if (quotaEnabled) {

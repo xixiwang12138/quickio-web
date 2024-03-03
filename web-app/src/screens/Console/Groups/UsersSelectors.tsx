@@ -24,17 +24,19 @@ import { usersSort } from "../../../utils/sortFunctions";
 import { setModalErrorSnackMessage } from "../../../systemSlice";
 import { useAppDispatch } from "../../../store";
 import SearchBox from "../Common/SearchBox";
+import {Bucket} from "../../../api/consoleApi";
 
 interface IGroupsProps {
   selectedUsers: string[];
   setSelectedUsers: any;
   editMode?: boolean;
+  title?: string;
 }
 
 const UsersSelectors = ({
   selectedUsers,
   setSelectedUsers,
-  editMode = false,
+  editMode = false, title
 }: IGroupsProps) => {
   const dispatch = useAppDispatch();
   //Local States
@@ -42,17 +44,17 @@ const UsersSelectors = ({
   const [loading, isLoading] = useState<boolean>(false);
   const [filter, setFilter] = useState<string>("");
 
-  const fetchUsers = useCallback(() => {
-    api.users
-      .listUsers()
+  const fetchBuckets = useCallback(() => {
+    api.buckets
+      .listBuckets()
       .then((res) => {
-        let users = get(res.data, "users", []);
+        let buckets = get(res.data, "buckets", []);
 
-        if (!users) {
-          users = [];
+        if (!buckets) {
+          buckets = [];
         }
 
-        setRecords(users.sort(usersSort));
+        setRecords(buckets);
         isLoading(false);
       })
       .catch((err) => {
@@ -68,9 +70,9 @@ const UsersSelectors = ({
 
   useEffect(() => {
     if (loading) {
-      fetchUsers();
+      fetchBuckets();
     }
-  }, [loading, fetchUsers]);
+  }, [loading, fetchBuckets]);
 
   const selUsers = !selectedUsers ? [] : selectedUsers;
 
@@ -94,8 +96,8 @@ const UsersSelectors = ({
     return elements;
   };
 
-  const filteredRecords = records.filter((elementItem) =>
-    elementItem.accessKey.includes(filter),
+  const filteredRecords = records.filter((elementItem: Bucket) =>
+    elementItem.name.includes(filter),
   );
 
   return (
@@ -104,22 +106,14 @@ const UsersSelectors = ({
         {loading && <ProgressBar />}
         {records?.length > 0 ? (
           <Fragment>
-            <Grid item xs={12} className={"inputItem"}>
-              <SearchBox
-                label={editMode ? "Edit Members" : "Assign Users"}
-                placeholder="Filter Users"
-                onChange={setFilter}
-                value={filter}
-              />
-            </Grid>
             <DataTable
-              columns={[{ label: "Access Key", elementKey: "accessKey" }]}
+              columns={[{ label: `${title}`, elementKey: "name" }]}
               onSelect={selectionChanged}
               selectedItems={selUsers}
               isLoading={loading}
               records={filteredRecords}
-              entityName="Users"
-              idField="accessKey"
+              entityName="Buckets"
+              idField="name"
               customPaperHeight={"200px"}
             />
           </Fragment>
@@ -130,7 +124,7 @@ const UsersSelectors = ({
               padding: "10px 0",
             }}
           >
-            No Users to display
+            No Bucket to display
           </Box>
         )}
       </Box>

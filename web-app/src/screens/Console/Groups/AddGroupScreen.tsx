@@ -14,141 +14,258 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Fragment, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { modalStyleUtils } from "../Common/FormComponents/common/styleLibrary";
+import React, {Fragment, useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {modalStyleUtils} from "../Common/FormComponents/common/styleLibrary";
 
 import {
-  BackLink,
-  Button,
-  CreateGroupIcon,
-  FormLayout,
-  Grid,
-  InputBox,
-  PageLayout,
-  ProgressBar,
+    BackLink, Box,
+    Button,
+    CreateGroupIcon, DataTable,
+    FormLayout,
+    Grid,
+    InputBox,
+    PageLayout,
+    ProgressBar, ReadBox, Switch,
 } from "mds";
-import { api } from "api";
-import { errorToHandler } from "api/errors";
-import { IAM_PAGES } from "../../../common/SecureComponent/permissions";
-import { setErrorSnackMessage, setHelpName } from "../../../systemSlice";
-import { useAppDispatch } from "../../../store";
+import {api} from "api";
+import {errorToHandler} from "api/errors";
+import {IAM_PAGES} from "../../../common/SecureComponent/permissions";
+import {setErrorSnackMessage, setHelpName, setUserPerm} from "../../../systemSlice";
+import {AppState, useAppDispatch} from "../../../store";
 import AddGroupHelpBox from "./AddGroupHelpBox";
 import UsersSelectors from "./UsersSelectors";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
+import {setQuota} from "../Buckets/ListBuckets/AddBucket/addBucketsSlice";
+import {Permission} from "../../../api/consoleApi";
+import {useSelector} from "react-redux";
+
+
+const SelectRecord = (
+    display: any,
+    selectedRecords: any,
+    select: any,
+    title: string,
+) => {
+    return <FormLayout withBorders={false} containerPadding={false}>
+        <Grid item xs={12} className={"inputItem"}>
+            <Box>
+                {display?.length > 0 ? (
+                    <Fragment>
+                        <DataTable
+                            columns={[{label: `${title}`, elementKey: "name"}]}
+                            onSelect={select}
+                            selectedItems={selectedRecords}
+                            isLoading={false}
+                            records={display}
+                            idField="name"
+                            customPaperHeight={"200px"}
+                        />
+                    </Fragment>
+                ) : (
+                    <></>
+                )}
+            </Box>
+        </Grid>
+    </FormLayout>;
+}
+
 
 const AddGroupScreen = () => {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const [groupName, setGroupName] = useState<string>("");
-  const [saving, isSaving] = useState<boolean>(false);
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [validGroup, setValidGroup] = useState<boolean>(false);
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const [groupName, setGroupName] = useState<string>("");
+    const [saving, isSaving] = useState<boolean>(false);
+    const [loadUserPerm, setLoadUserPerm] = useState<boolean>(true);
 
-  useEffect(() => {
-    setValidGroup(groupName.trim() !== "");
-  }, [groupName, selectedUsers]);
 
-  useEffect(() => {
-    if (saving) {
-      const saveRecord = () => {
-        api.groups
-          .addGroup({
-            group: groupName,
-            members: selectedUsers,
-          })
-          .then((res) => {
-            isSaving(false);
-            navigate(`${IAM_PAGES.GROUPS}`);
-          })
-          .catch((err) => {
-            isSaving(false);
-            dispatch(setErrorSnackMessage(errorToHandler(err.error)));
-          });
-      };
+    const [read, setRead] = useState<string[]>([]);
+    const [write, setWrite] = useState<string[]>([]);
+    const [manage, setManage] = useState<string[]>([]);
 
-      saveRecord();
-    }
-  }, [saving, groupName, selectedUsers, dispatch, navigate]);
 
-  //Fetch Actions
-  const setSaving = (event: React.FormEvent) => {
-    event.preventDefault();
+    const [validGroup, setValidGroup] = useState<boolean>(false);
+    const [allowGrant, setAllowGrant] = useState<boolean>(false);
+    const [allow_create_user, setAllowCreateUser] = useState<boolean>(false);
 
-    isSaving(true);
-  };
+    const perm = useSelector(
+        (state: AppState) => state.system.userPerm
+    )
 
-  const resetForm = () => {
-    setGroupName("");
-    setSelectedUsers([]);
-  };
-
-  useEffect(() => {
-    dispatch(setHelpName("add_group"));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return (
-    <Fragment>
-      <PageHeaderWrapper
-        label={
-          <BackLink
-            label={"Groups"}
-            onClick={() => navigate(IAM_PAGES.GROUPS)}
-          />
+    useEffect(() => {
+        // 获取用户权限
+        if (loadUserPerm) {
+            const loadPerm = () => {
+                api.user.getUserPerm({}).then((res) => {
+                    dispatch(setUserPerm(res.data))
+                    setLoadUserPerm(false)
+                })
+            }
+            setLoadUserPerm(true)
+            loadPerm()
         }
-        actions={<HelpMenu />}
-      />
-      <PageLayout>
-        <FormLayout
-          title={"Create Group"}
-          icon={<CreateGroupIcon />}
-          helpBox={<AddGroupHelpBox />}
-        >
-          <form noValidate autoComplete="off" onSubmit={setSaving}>
-            <InputBox
-              id="group-name"
-              name="group-name"
-              label="Group Name"
-              autoFocus={true}
-              value={groupName}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setGroupName(e.target.value);
-              }}
-            />
-            <UsersSelectors
-              selectedUsers={selectedUsers}
-              setSelectedUsers={setSelectedUsers}
-              editMode={true}
-            />
-            <Grid item xs={12} sx={modalStyleUtils.modalButtonBar}>
-              <Button
-                id={"clear-group"}
-                type="button"
-                variant="regular"
-                onClick={resetForm}
-                label={"Clear"}
-              />
 
-              <Button
-                id={"save-group"}
-                type="submit"
-                variant="callAction"
-                disabled={saving || !validGroup}
-                label={"Save"}
-              />
-            </Grid>
-            {saving && (
-              <Grid item xs={12}>
-                <ProgressBar />
-              </Grid>
-            )}
-          </form>
-        </FormLayout>
-      </PageLayout>
-    </Fragment>
-  );
+    }, [loadUserPerm])
+
+    useEffect(() => {
+        setValidGroup(groupName.trim() !== "");
+    }, [groupName, read]);
+
+    useEffect(() => {
+        if (saving) {
+            const saveRecord = () => {
+                api.role.createRole({
+                    name: groupName,
+                    read_access: read.map((v) => {
+                        return {
+                            resource_type: "bucket",
+                            resource_index: v,
+                        }
+                    }),
+                    write_access: write.map((v) => {
+                        return {
+                            resource_type: "bucket",
+                            resource_index: v,
+                        }
+                    }),
+                    manage_access: manage.map((v) => {
+                        return {
+                            resource_type: "bucket",
+                            resource_index: v,
+                        }
+                    }),
+                    allow_create_user: allow_create_user,
+                }).then((res) => {
+                    isSaving(false);
+                    navigate(`${IAM_PAGES.GROUPS}`);
+                }).catch((err) => {
+                    isSaving(false);
+                    dispatch(setErrorSnackMessage(errorToHandler(err.error)));
+                });
+            };
+
+            saveRecord();
+        }
+    }, [saving, groupName, read, dispatch, navigate]);
+
+    //Fetch Actions
+    const setSaving = (event: React.FormEvent) => {
+        event.preventDefault();
+        isSaving(true);
+    };
+
+    const resetForm = () => {
+        setGroupName("");
+        setRead([]);
+        setWrite([])
+        setAllowCreateUser(false);
+        setAllowGrant(false)
+    };
+
+    useEffect(() => {
+        dispatch(setHelpName("add_group"));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return (
+        <Fragment>
+            <PageHeaderWrapper
+                label={
+                    <BackLink
+                        label={"角色"}
+                        onClick={() => navigate(IAM_PAGES.GROUPS)}
+                    />
+                }
+                actions={<HelpMenu/>}
+            />
+            <PageLayout>
+                <FormLayout
+                    title={"创建角色"}
+                    icon={<CreateGroupIcon/>}
+                    helpBox={<AddGroupHelpBox/>}
+                >
+                    <form noValidate autoComplete="off" onSubmit={setSaving}>
+                        <InputBox
+                            id="group-name"
+                            name="group-name"
+                            label="角色名称"
+                            autoFocus={true}
+                            value={groupName}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                setGroupName(e.target.value);
+                            }}
+                        />
+                        <SelectRecord
+                            selectedRecords={read}
+                            select={setRead}
+                            display={perm?.readable.map(value => value.resource_index)}
+                            title={"授予仅读权限的bucket"}
+                        />
+
+                        <SelectRecord
+                            select={write}
+                            selectedRecords={setWrite}
+                            display={perm?.writable.map(value => value.resource_index)}
+                            title={"授予读写权限的bucket"}
+                        />
+
+                        <SelectRecord
+                            select={manage}
+                            selectedRecords={setManage}
+                            display={perm?.manageable.map(value => value.resource_index)}
+                            title={"授予管理权限的bucket"}
+                        />
+
+
+                        {
+                            perm?.create_user ?
+                                <Switch
+                                    value="allow_create_user"
+                                    id="allow_create_user"
+                                    name="allow_create_user"
+                                    checked={allow_create_user}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                        setAllowCreateUser(event.target.checked)
+                                    }}
+                                    label={"允许该角色创建新的用户"}
+                                    disabled={!perm?.create_user}
+                                    helpTipPlacement="right"
+                                /> : <></>
+                        }
+
+                        <Grid item xs={12} sx={modalStyleUtils.modalButtonBar}>
+                            <Button
+                                id={"clear-group"}
+                                type="button"
+                                variant="regular"
+                                onClick={resetForm}
+                                label={"Clear"}
+                            />
+
+                            <Button
+                                id={"save-group"}
+                                type="submit"
+                                variant="callAction"
+                                disabled={saving || !validGroup}
+                                label={"Save"}
+                            />
+                        </Grid>
+                        {saving && (
+                            <Grid item xs={12}>
+                                <ProgressBar/>
+                            </Grid>
+                        )}
+                        {loadUserPerm && (
+                            <Grid item xs={12}>
+                                <ProgressBar/>
+                            </Grid>
+                        )}
+                    </form>
+                </FormLayout>
+            </PageLayout>
+        </Fragment>
+    );
 };
 
 export default AddGroupScreen;

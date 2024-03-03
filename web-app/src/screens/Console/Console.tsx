@@ -277,20 +277,20 @@ const Console = () => {
     {
       component: Users,
       path: IAM_PAGES.USERS,
-      fsHidden: ldapIsEnabled,
+      forceDisplay: true,
       customPermissionFnc: () => true
         // hasPermission(CONSOLE_UI_RESOURCE, [IAM_SCOPES.ADMIN_LIST_USERS]) ||
         // hasPermission(S3_ALL_RESOURCES, [IAM_SCOPES.ADMIN_CREATE_USER]),
     },
-    // {
-    //   component: Groups,
-    //   path: IAM_PAGES.GROUPS,
-    //   fsHidden: ldapIsEnabled,
-    // },
-    // {
-    //   component: AddGroupScreen,
-    //   path: IAM_PAGES.GROUPS_ADD,
-    // },
+    {
+      component: Groups,
+      path: IAM_PAGES.GROUPS,
+      forceDisplay: true,
+    },
+    {
+      component: AddGroupScreen,
+      path: IAM_PAGES.GROUPS_ADD,
+    },
     // {
     //   component: GroupsDetails,
     //   path: IAM_PAGES.GROUPS_VIEW,

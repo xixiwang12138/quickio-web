@@ -231,21 +231,21 @@ const OBListBuckets = () => {
                       </div>
                     ),
                   },
-                  {
-                    label: "Access",
-                    elementKey: "rw_access",
-                    renderFullObject: true,
-                    renderFunction: (bucket: Bucket) => {
-                      let access = [];
-                      if (bucket.rw_access?.read) {
-                        access.push("R");
-                      }
-                      if (bucket.rw_access?.write) {
-                        access.push("W");
-                      }
-                      return <span>{access.join("/")}</span>;
-                    },
-                  },
+                  // {
+                  //   label: "Access",
+                  //   elementKey: "rw_access",
+                  //   renderFullObject: true,
+                  //   renderFunction: (bucket: Bucket) => {
+                  //     let access = [];
+                  //     if (bucket.rw_access?.read) {
+                  //       access.push("R");
+                  //     }
+                  //     if (bucket.rw_access?.write) {
+                  //       access.push("W");
+                  //     }
+                  //     return <span>{access.join("/")}</span>;
+                  //   },
+                  // },
                 ]}
                 itemActions={tableActions}
               />

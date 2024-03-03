@@ -44,16 +44,11 @@ export interface Bucket {
     name: string;
     /** @format int64 */
     size?: number;
-    access?: BucketAccess;
-    definition?: string;
-    rw_access?: {
-        write?: boolean;
-        read?: boolean;
-    }; // unused
+    access?: string;
     /** @format int64 */
     objects?: number;
     details?: {
-        tags?: Record<string, string>;
+        // tags?: Record<string, string>;
         quota?: {
             /** @format int64 */
             quota?: number;
@@ -139,6 +134,34 @@ export interface User {
     status?: string;
     hasPolicy?: boolean;
 }
+
+interface Resource {
+    resource_type: string;
+    resource_index: string;
+}
+
+export interface Role {
+    id?: string;
+    name: string;
+    read_access: Resource[];
+    write_access: Resource[];
+    manage_access: Resource[];
+    allow_create_user: boolean;
+
+    creator?: string;
+    create_time?: number;
+    update_time?: number;
+    deleted_at?: number;
+}
+
+export interface Permission {
+    user_id: string;
+    readable: Resource[];
+    writable: Resource[];
+    manageable: Resource[]; // 可以将其授予给其他人访问权限的资源
+    create_user: boolean; // 是否可以创建用户
+}
+
 
 export interface ListUsersResponse {
     /** list of resulting users */
@@ -1731,6 +1754,8 @@ export class HttpClient<SecurityDataType = unknown> {
         const payloadFormatter = this.contentFormatters[type || ContentType.Json];
         const responseFormat = format || requestParams.format;
 
+        const jwt = "mock"
+
         return this.customFetch(
             `${baseUrl || this.baseUrl || ""}${path}${
                 queryString ? `?${queryString}` : ""
@@ -1738,6 +1763,7 @@ export class HttpClient<SecurityDataType = unknown> {
             {
                 ...requestParams,
                 headers: {
+                    "Authorization": jwt,
                     ...(requestParams.headers || {}),
                     ...(type && type !== ContentType.FormData
                         ? {"Content-Type": type}
@@ -1802,7 +1828,7 @@ export class Api<
          */
         loginDetail: (params: RequestParams = {}) =>
             this.request<LoginDetails, ApiError>({
-                path: `/login`,
+                path: `/user/login`,
                 method: "GET",
                 format: "json",
                 ...params,
@@ -3280,6 +3306,41 @@ export class Api<
                 ...params,
             }),
     };
+
+    role = {
+        createRole: (role: Role, params: RequestParams = {}) =>
+            this.request < Role, ApiError > ({
+                path: `/role`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                body: role,
+                ...params,
+            }),
+
+        listRoles: (offset: number, limit: number, params: RequestParams = {}) =>
+            this.request<{roles: Role[], count: number}, ApiError>({
+                path: `/role/list`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                query: {
+                  offset: offset,
+                  limit
+                },
+                ...params,
+            }),
+
+        getMyRoles: ( params: RequestParams = {}) =>
+            this.request<string[], ApiError>({
+                path: `/role/me`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            })
+    }
+
     user = {
         /**
          * No description
@@ -3299,6 +3360,14 @@ export class Api<
                 ...params,
             }),
 
+        getUserPerm: (params: RequestParams = {}) =>
+            this.request<Permission, ApiError>({
+                path: `/user/perm`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
         /**
          * No description
          *
